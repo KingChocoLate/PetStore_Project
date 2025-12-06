@@ -39,12 +39,6 @@ const router = createRouter({
       name: 'login',
       component: Login
     },
-
-    {
-      path: '/componentTest',
-      name: 'component',
-      component: ProductCard
-    }
   ],
 })
 

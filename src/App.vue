@@ -7,12 +7,10 @@
 
 <script lang="ts">
   import Navigation from './components/navigation.vue'
-  import ProductCard from './components/ProductCard.vue';
   export default {
     name: 'App',
     components: {
       Navigation,
-      ProductCard
     }
   }
 </script>
