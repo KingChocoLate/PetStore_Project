@@ -1,22 +1,24 @@
 <template>
-  <div class="nav_display">
-    <Navigation />
+  <div id="app">
+    <router-view />
   </div>
-  
 </template>
 
-<script lang="ts">
-  import Navigation from './components/navigation.vue'
+<script lang = "ts">
+  // Since we are removing the component from the template, we remove the import and declaration as well.
   export default {
     name: 'App',
+    // The components object is now empty or removed since Navigation is gone.
+    // If you had other persistent components, they would remain here.
     components: {
-      Navigation
+      // No components are imported here now
     }
   }
 </script>
 
 <style scoped>
-  .nav_display {
-    width: 100%;
+  #app {
+    /* Ensures the application container takes up at least the full height of the viewport */
+    min-height: 100vh;
   }
 </style>
