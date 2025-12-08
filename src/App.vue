@@ -1,7 +1,8 @@
 <template>
-  <div class="nav_display">
+  <div class="nav_display h-[120px]">
     <Navigation />
   </div>
+  <RouterView/>
   
 </template>
 
@@ -14,9 +15,3 @@
     }
   }
 </script>
-
-<style scoped>
-  .nav_display {
-    width: 100%;
-  }
-</style>
