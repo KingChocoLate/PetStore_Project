@@ -1,20 +1,29 @@
 <template>
   <div class="w-full">
-    <h3 v-if="title" class="font-poppins font-extrabold text-[24.10px] mb-4 text-[#181818]">
+    
+    <h3 v-if="title" class="font-poppins-semibold text-[24.10px] mb-4 text-[#181818]">
       {{ title }}
     </h3>
 
-    <ul :class="['flex', layout === 'row' ? 'flex-row justify-center gap-8 mb-8' : 'flex-col gap-2.5']">
+    <ul :class="['flex',
+       layout === 'row' 
+       ? 'flex-row justify-center gap-12 mb-8' :
+      'flex-col gap-2.5']">
       <li 
         v-for="item in items" 
         :key="item" 
-        class="cursor-pointer font-poppins text-[20px] font-semibold transition-colors duration-200"
-        @click="handleSelect(item)"
+        :class="[
+          'font-poppins text-[20px] transition-colors duration-200', 
+          layout === 'col' ? 'pl-4' : '' 
+        ]" 
       >
         <span 
-          :class="activeItem === item 
-                  ? 'text-[#008C00] font-bold'  // Active: Green and Semi-Bold
-                  : 'text-[#181818] font-bold hover:text-[#008C00]'" 
+          :class="[
+            'text-[20px] hover:text-[#008C00]',
+            activeItem === item 
+                  ? 'text-[#008C00] font-poppins-semibold' // Use the forceful class
+                  : 'text-[#000000] font-poppins-semibold' // Use the forceful class
+          ]" 
         >
           {{ item }}
         </span>
@@ -46,12 +55,5 @@ export default defineComponent({
       default: ''
     },
   },
-  emits: ['select'], 
-  methods: {
-    // Simplified handler for single-select link click
-    handleSelect(item: string) {
-      this.$emit('select', item);
-    }
-  }
 });
 </script>

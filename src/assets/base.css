@@ -2,37 +2,37 @@
 /* color palette from <https://github.com/vuejs/theme> */
 @font-face {
     font-family: 'Poppins';
-    src: url(./assets/fonts/Poppins-Regular.ttf) format('truetype');
+    src: url(../assets/fonts/Poppins-Regular.ttf) format('truetype');
     font-weight: 400;
   }
 
   @font-face {
     font-family: 'Poppins';
-    src: url(./assets/fonts/Poppins-Light.ttf) format('truetype');
+    src: url(../assets/fonts/Poppins-Light.ttf) format('truetype');
     font-weight: 300;
   }
 
   @font-face {
     font-family: 'Poppins';
-    src: url(./assets/fonts/Poppins-Medium.ttf) format('truetype');
+    src: url(../assets/fonts/Poppins-Medium.ttf) format('truetype');
     font-weight: 500;
   }
 
   @font-face {
     font-family: 'Poppins';
-    src: url(./assets/fonts/Poppins-SemiBold.ttf) format('truetype');
+    src: url(../assets/fonts/Poppins-SemiBold.ttf) format('truetype');
     font-weight: 600;
   }
 
   @font-face {
     font-family: 'Poppins';
-    src: url(./assets/fonts/Poppins-Bold.ttf) format('truetype');
+    src: url(../assets/fonts/Poppins-Bold.ttf) format('truetype');
     font-weight: 700;
   }
 
   @font-face {
     font-family: 'Poppins';
-    src: url(./assets/fonts/Poppins-ExtraBold.ttf) format('truetype');
+    src: url(../assets/fonts/Poppins-ExtraBold.ttf) format('truetype');
     font-weight: 800;
   }
 
@@ -122,3 +122,11 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
+
+/* Add this ban jenh */
+.font-poppins-semibold {
+    font-family: 'Poppins', sans-serif !important;
+    font-weight: 600 !important; /* Forces Bold */
+}
+
