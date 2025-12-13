@@ -3,16 +3,13 @@
     <Navigation />
   </div>
   <RouterView/>
-  
- 
 </template>
 
-<script lang="ts">
-  import Navigation from './components/navigation.vue'
+<script lang = "ts">
   export default {
     name: 'App',
     components: {
-      Navigation,
+        Navigation
     }
   }
 </script>
