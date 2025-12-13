@@ -92,7 +92,6 @@
 *::after {
   box-sizing: border-box;
   margin: 0;
-  font-weight: inherit;
 }
 
 body {
@@ -121,4 +120,44 @@ body {
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+#app {
+  width: 100%;
+}
+
+@keyframes animate-slider {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-100%); }
+}
+
+@layer utilities {
+  .animate-slider {
+    animation: animate-slider 20s linear infinite;
+  }
+
+  .font-poppins-light {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 300;
+  }
+
+  .font-poppins-regular {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 400;
+  }
+
+  .font-poppins-medium {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+  }
+
+  .font-poppins-bold {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 700;
+  }
+
+  .font-poppins-extraBold {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 800;
+  }
 }
