@@ -1,13 +1,13 @@
 <template>
   <div class="w-full">
     
-    <h3 v-if="title" class="font-poppins-semibold text-[24.10px] mb-4 text-[#181818]">
+    <h3 v-if="title" class="font-poppins-semiBold text-[24.10px] mb-4 text-[#181818]">
       {{ title }}
     </h3>
 
     <ul :class="['flex',
        layout === 'row' 
-       ? 'flex-row justify-center gap-12 mb-8' :
+       ? 'font-poppins-semiBold flex-row justify-center gap-12 mb-8' :
       'flex-col gap-2.5']">
       <li 
         v-for="item in items" 
@@ -19,10 +19,10 @@
       >
         <span 
           :class="[
-            'text-[20px] hover:text-[#008C00]',
+            'text-[19px] hover:text-[#008C00]',
             activeItem === item 
-                  ? 'text-[#008C00] font-poppins-semibold' // Use the forceful class
-                  : 'text-[#000000] font-poppins-semibold' // Use the forceful class
+                  ? 'text-[#008C00] font-poppins-medium' 
+                  : 'text-[#000000] font-poppins-medium'
           ]" 
         >
           {{ item }}

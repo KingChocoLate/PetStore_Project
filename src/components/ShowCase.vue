@@ -1,5 +1,5 @@
 <template>
-    <div class="relative flex gap-[5px] overflow-hidden">
+    <div class="flex gap-[5px] overflow-hidden w-full">
         <div class="flex gap-[5px] animate-slider shrink-0">
             <img v-for="(img, index) in images" :key="'first-' + index" :src="img" alt="">
         </div>

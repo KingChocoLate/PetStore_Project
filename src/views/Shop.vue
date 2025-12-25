@@ -46,17 +46,14 @@
       </aside>
 
       <main class="flex-1">
-        <div class="py-20 text-center text-gray-600">
-            <div class="flex justify-center items-center">
+            <div class="flex justify-between items-center">
               <ProductCard 
                 productName="Product"
-                :rating="3"
-                 description="This toy also has an attractive design and cute features, such as spikes on its back and embroidered detail. "
-                 :price="66.77"
-                 :image="toy"
+                rating=3
+                description="This toy also has an attractive design and cute features, such as spikes on its back and embroidered detail. "
+                price="66.77"
               />
           </div>
-        </div>
       </main>
     </div>
   </div>
@@ -65,11 +62,13 @@
 <script lang="ts">
 import { defineComponent } from 'vue'
 import Menu from '../components/Menu.vue'
+import ProductCard from '../components/ProductCard.vue';
 
 export default defineComponent({
   name: 'Shop',
   components: {
     Menu,
+    ProductCard
   },
   setup() {
     // --- Menu Options (Static Data) ---
