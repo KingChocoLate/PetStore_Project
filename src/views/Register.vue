@@ -1,9 +1,5 @@
     <template>
       <div class="register-container">
-        <div class="logo-header">
-          <img :src="petstoreLogo" alt="PetStore Logo" class="petstore-logo" />
-        </div>
-
         <div class="card-wrapper">
           <div class="theme-banner">
             <div class="slogan-content">
@@ -157,7 +153,7 @@
             alert('Error: Passwords must match to register.');
             return;
           }
-
+          // Registration Logic Here
           console.log("Registering:", email.value);
           router.push('/login');
         };
@@ -201,19 +197,6 @@
       overflow: hidden;
     }
 
-    .logo-header {
-      position: absolute;
-      top: 30px;
-      left: 50px;
-      z-index: 100;
-    }
-
-    .petstore-logo {
-      max-width: 160px;
-      height: auto;
-      display: block;
-    }
-
     .card-wrapper {
       display: flex;
       width: 90%;
@@ -236,6 +219,7 @@
       overflow: hidden;
     }
 
+
     .register-form-area {
       flex: 0 0 55%;
       background-color: #fff;
@@ -246,6 +230,7 @@
       align-items: center;
       position: relative;
     }
+
 
     .slogan-content {
       flex-grow: 1;
@@ -306,6 +291,7 @@
       object-position: bottom center;
     }
 
+    /* --- CLOSE ICON --- */
     .close-icon {
       position: absolute;
       top: 30px;
@@ -323,6 +309,7 @@
       color: #666;
     }
 
+    /* --- FORM CONTENT --- */
     .form-content {
       width: 100%;
       max-width: 420px;
@@ -336,6 +323,7 @@
       text-align: center;
       color: #000;
     }
+
 
     .input-group {
       margin-bottom: 18px;
@@ -359,6 +347,7 @@
       transition: all 0.3s ease;
       background-color: #fff;
     }
+
 
     .email-wrapper, .input-wrapper:focus-within {
       border-color: #009200;
@@ -478,14 +467,12 @@
       text-decoration: underline;
     }
 
-    /* --- ERROR MESSAGE --- */
     .error-message {
       color: #ff0000;
       font-size: 0.8rem;
       margin-top: 5px;
     }
 
-    /* --- RESPONSIVE ADJUSTMENTS --- */
     @media (max-width: 1200px) {
       .card-wrapper {
         width: 95%;

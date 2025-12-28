@@ -1,4 +1,5 @@
 <template>
+  <div class="login-container">
     <div class="card-wrapper">
       <div class="theme-banner">
         <div class="slogan-content">
@@ -154,7 +155,6 @@ export default defineComponent({
   box-sizing: border-box;
 }
 
-
 .login-container {
   display: flex;
   height: 100vh;
@@ -190,7 +190,6 @@ export default defineComponent({
   overflow: hidden;
 }
 
-
 .login-form-area {
   flex: 0 0 55%;
   background-color: #fff;
@@ -201,6 +200,7 @@ export default defineComponent({
   align-items: center;
   position: relative;
 }
+
 
 .slogan-content {
   flex-grow: 1;
@@ -261,6 +261,7 @@ export default defineComponent({
   object-position: bottom center;
 }
 
+
 .close-icon {
   position: absolute;
   top: 30px;
@@ -278,6 +279,7 @@ export default defineComponent({
   color: #666;
 }
 
+
 .form-content {
   width: 100%;
   max-width: 420px;
@@ -291,6 +293,7 @@ export default defineComponent({
   text-align: center;
   color: #000;
 }
+
 
 .input-group {
   margin-bottom: 20px;
@@ -362,11 +365,10 @@ export default defineComponent({
   text-decoration: underline;
 }
 
-
 .login-button {
   width: 100%;
   padding: 16px;
-  background-color: #009200;
+  background-color: #009200; /* Green */
   color: #fff;
   border: none;
   border-radius: 10px;
