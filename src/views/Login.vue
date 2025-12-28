@@ -159,7 +159,6 @@ export default defineComponent({
   box-sizing: border-box;
 }
 
-/* --- GLOBAL CONTAINER --- */
 .login-container {
   display: flex;
   height: 100vh;
@@ -172,7 +171,6 @@ export default defineComponent({
   overflow: hidden;
 }
 
-/* --- LOGO HEADER --- */
 .logo-header {
   position: absolute;
   top: 30px;
@@ -186,23 +184,23 @@ export default defineComponent({
   display: block;
 }
 
-/* --- CARD WRAPPER --- */
+
 .card-wrapper {
   display: flex;
   width: 90%;
   max-width: 1100px;
-  min-height: 600px; /* Matched to Register */
-  height: auto;      /* Allows content to push height */
+  min-height: 600px;
+  height: auto;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
   border-radius: 30px;
   overflow: hidden;
   background-color: #fff;
 }
 
-/* --- LEFT BANNER (BLUE THEME) --- */
+
 .theme-banner {
   flex: 0 0 45%;
-  background-color: #AEE2E8; /* Light Blue */
+  background-color: #AEE2E8;
   padding: 50px 40px 0 40px;
   display: flex;
   flex-direction: column;
@@ -210,19 +208,18 @@ export default defineComponent({
   overflow: hidden;
 }
 
-/* --- RIGHT FORM AREA --- */
 .login-form-area {
   flex: 0 0 55%;
   background-color: #fff;
-  padding: 40px 70px; /* Reduced padding (Matched Register) */
+  padding: 40px 70px;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  align-items: center; /* Center contents horizontally */
+  align-items: center;
   position: relative;
 }
 
-/* --- SLOGAN & VISUAL ELEMENTS --- */
+
 .slogan-content {
   flex-grow: 1;
   position: relative;
@@ -282,7 +279,7 @@ export default defineComponent({
   object-position: bottom center;
 }
 
-/* --- CLOSE ICON --- */
+
 .close-icon {
   position: absolute;
   top: 30px;
@@ -300,7 +297,7 @@ export default defineComponent({
   color: #666;
 }
 
-/* --- FORM CONTENT --- */
+
 .form-content {
   width: 100%;
   max-width: 420px;
@@ -310,14 +307,14 @@ export default defineComponent({
   font-size: 2rem;
   font-weight: 700;
   margin-bottom: 20px;
-  margin-top: 10px; /* Matched Register */
+  margin-top: 10px;
   text-align: center;
   color: #000;
 }
 
-/* --- INPUT FIELDS --- */
+
 .input-group {
-  margin-bottom: 20px; /* Standard spacing for login */
+  margin-bottom: 20px;
 }
 
 .input-group label {
@@ -339,7 +336,6 @@ export default defineComponent({
   background-color: #fff;
 }
 
-/* Green border on focus/email */
 .email-wrapper, .input-wrapper:focus-within {
   border-color: #009200;
 }
@@ -356,7 +352,6 @@ export default defineComponent({
   font-weight: 500;
 }
 
-/* --- ICONS --- */
 .input-wrapper .icon {
   font-size: 1.2rem;
   color: #000;
@@ -371,7 +366,6 @@ export default defineComponent({
   cursor: pointer;
 }
 
-/* --- FORGOT PASSWORD --- */
 .forgot-password-row {
   text-align: right;
   margin-top: -12px;
@@ -389,7 +383,6 @@ export default defineComponent({
   text-decoration: underline;
 }
 
-/* --- LOGIN BUTTON --- */
 .login-button {
   width: 100%;
   padding: 16px;
@@ -411,7 +404,6 @@ export default defineComponent({
   box-shadow: 0 4px 12px rgba(0, 146, 0, 0.3);
 }
 
-/* --- SEPARATOR --- */
 .separator {
   display: flex;
   align-items: center;
@@ -433,12 +425,11 @@ export default defineComponent({
   white-space: nowrap;
 }
 
-/* --- SOCIAL LOGIN BUTTONS --- */
 .social-login {
   display: flex;
   justify-content: center;
   gap: 20px;
-  margin-bottom: 30px; /* Reduced to fit */
+  margin-bottom: 30px;
 }
 
 .social-button {
@@ -461,7 +452,6 @@ export default defineComponent({
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
 }
 
-/* --- SIGN UP LINK --- */
 .signup-link {
   text-align: center;
   font-size: 0.85rem;
@@ -480,7 +470,6 @@ export default defineComponent({
   text-decoration: underline;
 }
 
-/* --- RESPONSIVE ADJUSTMENTS --- */
 @media (max-width: 1200px) {
   .card-wrapper {
     width: 95%;

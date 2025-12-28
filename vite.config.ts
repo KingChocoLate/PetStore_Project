@@ -12,6 +12,9 @@ export default defineConfig({
     vueDevTools(),
     tailwindcss()
   ],
+  server: {           // <--- I added this section
+    host: true        // <--- This tells Vite to listen on your network (0.0.0.0)
+  },
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url))
