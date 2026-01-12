@@ -1,7 +1,4 @@
 <template>
-  <div class="nav_display h-[120px]">
-    <Navigation />
-  </div>
   <RouterView/>
 </template>
 

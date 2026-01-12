@@ -6,36 +6,23 @@ import Contact from '../views/Contact.vue'
 import Register from '../views/Register.vue'
 import Login from '../views/Login.vue'
 import ProductDetail from '@/views/ProductDetail.vue'
+import CustomerLayout from '@/layouts/CustomerLayout.vue'
+import ProductCard from '@/components/ProductCard.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {path: '/',
-      name: 'home',
-      component: Home
+      redirect: '/home'
     },
-
-    {path: '/shop',
-      name: 'shop',
-      component: Shop
-    },
-
-    {path: '/about',
-      name: 'about',
-      component: About
-    },
-
-    {path: '/contact',
-      name: 'contact',
-      component: Contact
-    },
-
-    {path: '/register',
+    // Authentication routes
+    {
+      path: '/register',
       name: 'register',
       component: Register
     },
-
-    {path: '/login',
+    {
+      path: '/login',
       name: 'login',
       component: Login
     },
@@ -43,6 +30,74 @@ const router = createRouter({
       name: 'productDetail',
       component: ProductDetail
     },
+    {
+    path: '/profile',
+    name: 'profile',
+    component: () => import('../views/UserProfile.vue')
+    },
+      path: '/',
+      component: CustomerLayout,
+      children: [
+        {
+          path: '/home',
+          name: 'home',
+          component: Home
+        },
+        {
+          path: '/shop',
+          name: 'shop',
+          component: Shop
+        },
+        {
+          path: '/about',
+          name: 'about',
+          component: About
+        },
+        {
+          path: '/contact',
+          name: 'contact',
+          component: Contact
+        },
+      ]
+    },
+
+    
+
+    // Admin routes
+    {path: '/admin',
+      redirect: '/admin/dashboard'
+    },
+    {
+      path: '/admin',
+      component: () => import('@/layouts/AdminLayout.vue'),
+      children: [
+        {
+          path: 'dashboard',
+          name: 'admin-dashboard',
+          component: () => import('@/views/Admin/Dashboard.vue')
+        }, 
+        {
+          path: 'products',
+          name: 'admin-products',
+          component: () => import('@/views/Admin/Products.vue')
+        },
+        {
+          path: 'orders',
+          name: 'admin-orders',
+          component: () => import('@/views/Admin/Orders.vue')
+        }, 
+        {
+          path: 'customers',
+          name: 'admin-customers',
+          component: () => import('@/views/Admin/Customers.vue')
+        },
+        {
+          path: 'promotions',
+          name: 'admin-promotions',
+          component: () => import('@/views/Admin/Promotions.vue')
+        }
+      ]
+    }
   ],
 })
 
