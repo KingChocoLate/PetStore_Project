@@ -1,5 +1,13 @@
 <template>
   <div class="login-container">
+
+    <transition name="fade">
+      <div v-if="notification.visible" :class="['toast-notification', notification.type]">
+        <span class="toast-icon">{{ notification.type === 'success' ? '✅' : '❌' }}</span>
+        <span class="toast-message">{{ notification.message }}</span>
+      </div>
+    </transition>
+
     <div class="card-wrapper">
       <div class="theme-banner">
         <div class="slogan-content">
@@ -54,8 +62,8 @@
               <router-link to="/forgot-password" class="forgot-link">Forgot Password?</router-link>
             </div>
 
-            <button type="submit" class="login-button">
-              Login
+            <button type="submit" class="login-button" :disabled="isLoading">
+              {{ isLoading ? 'Logging in...' : 'Login' }}
             </button>
           </form>
 
@@ -67,29 +75,13 @@
 
           <div class="social-login">
             <button type="button" class="social-button google">
-              <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="50" height="50" viewBox="0 0 48 48">
-                <path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"></path>
-                <path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"></path>
-                <path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"></path>
-                <path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571c0.001-0.001,0.002-0.001,0.003-0.002l6.19,5.238C36.971,39.205,44,34,44,24C44,22.659,43.862,21.35,43.611,20.083z"></path>
-              </svg>
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"/><path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"/><path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"/><path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571c0.001-0.001,0.002-0.001,0.003-0.002l6.19,5.238C36.971,39.205,44,34,44,24C44,22.659,43.862,21.35,43.611,20.083z"/></svg>
             </button>
-
             <button type="button" class="social-button facebook">
-              <svg xmlns="http://www.w3.org/2000/svg" xml:space="preserve" viewBox="0 0 40 40" width="40" height="40">
-                <linearGradient id="a" x1="-277.375" x2="-277.375" y1="406.6018" y2="407.5726" gradientTransform="matrix(40 0 0 -39.7778 11115.001 16212.334)" gradientUnits="userSpaceOnUse">
-                  <stop offset="0" stop-color="#0062e0"/>
-                  <stop offset="1" stop-color="#19afff"/>
-                </linearGradient>
-                <path fill="url(#a)" d="M16.7 39.8C7.2 38.1 0 29.9 0 20 0 9 9 0 20 0s20 9 20 20c0 9.9-7.2 18.1-16.7 19.8l-1.1-.9h-4.4l-1.1.9z"/>
-                <path fill="#fff" d="m27.8 25.6.9-5.6h-5.3v-3.9c0-1.6.6-2.8 3-2.8H29V8.2c-1.4-.2-3-.4-4.4-.4-4.6 0-7.8 2.8-7.8 7.8V20h-5v5.6h5v14.1c1.1.2 2.2.3 3.3.3 1.1 0 2.2-.1 3.3-.3V25.6h4.4z"/>
-              </svg>
+               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" width="24" height="24"><linearGradient id="a" x1="-277.375" x2="-277.375" y1="406.6018" y2="407.5726" gradientTransform="matrix(40 0 0 -39.7778 11115.001 16212.334)" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#0062e0"/><stop offset="1" stop-color="#19afff"/></linearGradient><path fill="url(#a)" d="M16.7 39.8C7.2 38.1 0 29.9 0 20 0 9 9 0 20 0s20 9 20 20c0 9.9-7.2 18.1-16.7 19.8l-1.1-.9h-4.4l-1.1.9z"/><path fill="#fff" d="m27.8 25.6.9-5.6h-5.3v-3.9c0-1.6.6-2.8 3-2.8H29V8.2c-1.4-.2-3-.4-4.4-.4-4.6 0-7.8 2.8-7.8 7.8V20h-5v5.6h5v14.1c1.1.2 2.2.3 3.3.3 1.1 0 2.2-.1 3.3-.3V25.6h4.4z"/></svg>
             </button>
-
             <button type="button" class="social-button apple">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="#000000" viewBox="0 0 24 24">
-                <path d="M18.71 19.5C17.88 20.74 17 21.95 15.66 21.97C14.32 22 13.89 21.18 12.37 21.18C10.84 21.18 10.37 21.95 9.09997 22C7.78997 22.05 6.79997 20.68 5.95997 19.47C4.24997 17 2.93997 12.45 4.69997 9.39C5.56997 7.87 7.12997 6.91 8.81997 6.88C10.1 6.86 11.32 7.75 12.11 7.75C12.89 7.75 14.37 6.68 15.92 6.84C16.57 6.87 18.39 7.1 19.56 8.82C19.47 8.88 17.39 10.1 17.41 12.63C17.44 15.65 20.06 16.66 20.09 16.67C20.06 16.74 19.67 18.11 18.71 19.5ZM13 3.5C13.73 2.67 14.94 2.04 15.94 2C16.07 3.17 15.6 4.35 14.9 5.19C14.21 6.04 13.07 6.7 11.95 6.61C11.8 5.46 12.36 4.26 13 3.5Z"/>
-              </svg>
+              <svg xmlns="http://www.w3.org/2000/svg" fill="#000000" viewBox="0 0 24 24" width="24" height="24"><path d="M18.71 19.5C17.88 20.74 17 21.95 15.66 21.97C14.32 22 13.89 21.18 12.37 21.18C10.84 21.18 10.37 21.95 9.09997 22C7.78997 22.05 6.79997 20.68 5.95997 19.47C4.24997 17 2.93997 12.45 4.69997 9.39C5.56997 7.87 7.12997 6.91 8.81997 6.88C10.1 6.86 11.32 7.75 12.11 7.75C12.89 7.75 14.37 6.68 15.92 6.84C16.57 6.87 18.39 7.1 19.56 8.82C19.47 8.88 17.39 10.1 17.41 12.63C17.44 15.65 20.06 16.66 20.09 16.67C20.06 16.74 19.67 18.11 18.71 19.5ZM13 3.5C13.73 2.67 14.94 2.04 15.94 2C16.07 3.17 15.6 4.35 14.9 5.19C14.21 6.04 13.07 6.7 11.95 6.61C11.8 5.46 12.36 4.26 13 3.5Z"/></svg>
             </button>
           </div>
 
@@ -107,6 +99,7 @@
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
 import { useRouter } from 'vue-router';
+import axios from 'axios';
 
 import petstoreLogo from '../assets/photos/Logo_PetStore.png';
 import sloganImage from '../assets/photos/texts.png';
@@ -120,22 +113,68 @@ export default defineComponent({
     const email = ref('');
     const password = ref('');
     const passwordVisible = ref(false);
+    const isLoading = ref(false);
+
+    const notification = ref({
+      visible: false,
+      message: '',
+      type: 'success'
+    });
+
     const router = useRouter();
 
     const togglePasswordVisibility = () => {
       passwordVisible.value = !passwordVisible.value;
     };
 
-    const handleLogin = () => {
-      // Login Logic Here
-      console.log('Logging in with:', email.value);
-      // router.push('/dashboard');
+    const showNotification = (message: string, type: 'success' | 'error') => {
+      notification.value = { visible: true, message, type };
+      setTimeout(() => {
+        notification.value.visible = false;
+      }, 3000);
+    };
+
+    const handleLogin = async () => {
+      if (!email.value || !password.value) {
+        showNotification('Please fill in both email and password.', 'error');
+        return;
+      }
+
+      isLoading.value = true;
+
+      try {
+        const response = await axios.post('http://localhost:3000/api/login', {
+          email: email.value,
+          password: password.value
+        });
+
+        if (response.status === 200) {
+          showNotification('Login Successful! Redirecting...', 'success');
+
+          console.log('User Data:', response.data.user);
+
+          setTimeout(() => {
+            router.push('/');
+          }, 1500);
+        }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } catch (error: any) {
+        if (error.response) {
+          showNotification(error.response.data.message, 'error');
+        } else {
+          showNotification('Cannot connect to server.', 'error');
+        }
+      } finally {
+        isLoading.value = false;
+      }
     };
 
     return {
       email,
       password,
       passwordVisible,
+      isLoading,
+      notification,
       togglePasswordVisibility,
       handleLogin,
       petstoreLogo,
@@ -166,6 +205,51 @@ export default defineComponent({
   position: relative;
   overflow: hidden;
 }
+
+.toast-notification {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: white;
+  padding: 15px 25px;
+  border-radius: 50px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  z-index: 1000;
+  min-width: 300px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  border-left: 5px solid;
+}
+
+.toast-notification.success {
+  border-left-color: #009200;
+  color: #006400;
+}
+
+.toast-notification.error {
+  border-left-color: #ff0000;
+  color: #d8000c;
+}
+
+.toast-icon {
+  font-size: 1.2rem;
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+  transform: translate(-50%, -20px);
+}
+
 
 .card-wrapper {
   display: flex;
@@ -368,7 +452,7 @@ export default defineComponent({
 .login-button {
   width: 100%;
   padding: 16px;
-  background-color: #009200; /* Green */
+  background-color: #009200;
   color: #fff;
   border: none;
   border-radius: 10px;
@@ -384,6 +468,13 @@ export default defineComponent({
   background-color: #007a00;
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(0, 146, 0, 0.3);
+}
+
+.login-button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 
 .separator {
