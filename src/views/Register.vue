@@ -7,6 +7,11 @@
         <span class="toast-message">{{ notification.message }}</span>
       </div>
     </transition>
+    <template>
+        <div class="card-wrapper">
+          <div class="theme-banner">
+            <div class="slogan-content">
+              <img :src="sloganImage" alt="Where Pets Are Family" class="slogan-img" />
 
     <div class="card-wrapper">
       <div class="theme-banner">
@@ -155,6 +160,337 @@ export default defineComponent({
       message: '',
       type: 'success'
     });
+    </script>
+
+    <style scoped>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    .register-container {
+      display: flex;
+      height: 100vh;
+      width: 100vw;
+      font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background-color: #ffffff;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card-wrapper {
+      display: flex;
+      width: 90%;
+      max-width: 1100px;
+      min-height: 600px;
+      height: auto;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+      border-radius: 30px;
+      overflow: hidden;
+      background-color: #fff;
+    }
+
+    .theme-banner {
+      flex: 0 0 45%;
+      background-color: #AEE2E8;
+      padding: 50px 40px 0 40px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+    }
+
+
+    .register-form-area {
+      flex: 0 0 55%;
+      background-color: #fff;
+      padding: 40px 70px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+    }
+
+
+    .slogan-content {
+      flex-grow: 1;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .slogan-img {
+      width: 30%;
+      max-width: 220px;
+      height: auto;
+      margin-bottom: 20px;
+      z-index: 10;
+      position: relative;
+    }
+
+    .visual-elements {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+
+    .birdhouse-img {
+      position: absolute;
+      top: 30px;
+      right: -5px;
+      width: 190px;
+      height: auto;
+      z-index: 10;
+    }
+
+    .paws-img {
+      position: absolute;
+      top: 50%;
+      right: 40px;
+      width: 90px;
+      height: auto;
+      z-index: 10;
+      transform: translateY(-50%);
+    }
+
+    .pets-img {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      width: 100%;
+      height: auto;
+      max-height: 55%;
+      z-index: 5;
+      object-fit: cover;
+      object-position: bottom center;
+    }
+
+    /* --- CLOSE ICON --- */
+    .close-icon {
+      position: absolute;
+      top: 30px;
+      right: 30px;
+      font-size: 2rem;
+      color: #000;
+      text-decoration: none;
+      cursor: pointer;
+      line-height: 1;
+      font-weight: 300;
+      transition: color 0.2s;
+    }
+
+    .close-icon:hover {
+      color: #666;
+    }
+
+    /* --- FORM CONTENT --- */
+    .form-content {
+      width: 100%;
+      max-width: 420px;
+    }
+
+    .register-form-area h2 {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 20px;
+      margin-top: 10px;
+      text-align: center;
+      color: #000;
+    }
+
+
+    .input-group {
+      margin-bottom: 18px;
+    }
+
+    .input-group label {
+      display: block;
+      font-weight: 700;
+      margin-bottom: 8px;
+      font-size: 0.95rem;
+      color: #000;
+    }
+
+    .input-wrapper {
+      display: flex;
+      align-items: center;
+      border: 2px solid #999;
+      border-radius: 8px;
+      height: 50px;
+      padding: 0 15px;
+      transition: all 0.3s ease;
+      background-color: #fff;
+    }
+
+
+    .email-wrapper, .input-wrapper:focus-within {
+      border-color: #009200;
+    }
+
+    .input-wrapper input {
+      flex-grow: 1;
+      border: none;
+      outline: none;
+      padding: 0 12px;
+      font-size: 0.95rem;
+      height: 100%;
+      color: #333;
+      font-family: inherit;
+      font-weight: 500;
+    }
+
+    .input-wrapper .icon {
+      font-size: 1.2rem;
+      color: #000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      width: 24px;
+    }
+
+    .view-icon {
+      cursor: pointer;
+    }
+
+    .register-button {
+      width: 100%;
+      padding: 16px;
+      background-color: #009200;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-family: inherit;
+      margin-top: 10px;
+      margin-bottom: 20px;
+    }
+
+    .register-button:hover {
+      background-color: #007a00;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0, 146, 0, 0.3);
+    }
+
+    .separator {
+      display: flex;
+      align-items: center;
+      text-align: center;
+      margin: 15px 0 20px 0;
+      font-size: 0.8rem;
+      color: #999;
+      font-weight: 600;
+    }
+
+    .separator hr {
+      flex-grow: 1;
+      border: none;
+      border-top: 1px solid #ccc;
+    }
+
+    .separator span {
+      padding: 0 15px;
+      white-space: nowrap;
+    }
+
+    .social-login {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      margin-bottom: 25px;
+    }
+
+    .social-button {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid #f0f0f0;
+      background-color: white;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+      padding: 0;
+    }
+
+    .social-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    }
+
+    .login-link {
+      text-align: center;
+      font-size: 0.85rem;
+      color: #000;
+      font-weight: 600;
+    }
+
+    .login-link .link {
+      color: #009200;
+      font-weight: 700;
+      text-decoration: none;
+      margin-left: 4px;
+    }
+
+    .login-link .link:hover {
+      text-decoration: underline;
+    }
+
+    .error-message {
+      color: #ff0000;
+      font-size: 0.8rem;
+      margin-top: 5px;
+    }
+
+    @media (max-width: 1200px) {
+      .card-wrapper {
+        width: 95%;
+        max-width: 1000px;
+      }
+      .register-form-area {
+        padding: 40px 50px;
+      }
+      .logo-header {
+        left: 40px;
+        top: 25px;
+      }
+    }
+
+    @media (max-width: 992px) {
+      .card-wrapper {
+        flex-direction: column;
+        width: 90%;
+        height: auto;
+        max-height: 90vh;
+        overflow-y: auto;
+      }
+      .theme-banner {
+        flex: 0 0 300px;
+        padding-top: 30px;
+      }
+      .birdhouse-img {
+        width: 140px;
+      }
+      .register-form-area {
+        flex: 1;
+        padding: 40px 50px;
+      }
+    }
 
     const showNotification = (message: string, type: 'success' | 'error') => {
       notification.value = { visible: true, message, type };

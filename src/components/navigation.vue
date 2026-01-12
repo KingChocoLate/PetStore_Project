@@ -41,9 +41,6 @@
     export default {
         name: 'Navigation',
 
-        methods: {
-
-        }
     }
 </script>
 
@@ -84,7 +81,7 @@
 
     .action_icons {
         display: flex;
-        align-items:center;
+        align-items: center;
         gap: 30px;
     }
 
@@ -109,7 +106,7 @@
     }
 
     .searchWrapper svg {
-        margin-top: 6px;
+        margin-top: 10px;
     }
 
     .Search {

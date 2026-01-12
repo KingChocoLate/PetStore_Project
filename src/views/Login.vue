@@ -263,6 +263,7 @@ export default defineComponent({
   background-color: #fff;
 }
 
+
 .theme-banner {
   flex: 0 0 45%;
   background-color: #AEE2E8;
@@ -283,6 +284,7 @@ export default defineComponent({
   align-items: center;
   position: relative;
 }
+
 
 .slogan-content {
   flex-grow: 1;
@@ -343,6 +345,7 @@ export default defineComponent({
   object-position: bottom center;
 }
 
+
 .close-icon {
   position: absolute;
   top: 30px;
@@ -360,6 +363,7 @@ export default defineComponent({
   color: #666;
 }
 
+
 .form-content {
   width: 100%;
   max-width: 420px;
@@ -373,6 +377,7 @@ export default defineComponent({
   text-align: center;
   color: #000;
 }
+
 
 .input-group {
   margin-bottom: 20px;
