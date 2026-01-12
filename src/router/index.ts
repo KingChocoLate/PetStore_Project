@@ -5,6 +5,7 @@ import About from '../views/About.vue'
 import Contact from '../views/Contact.vue'  
 import Register from '../views/Register.vue'
 import Login from '../views/Login.vue'
+import ProductDetail from '@/views/ProductDetail.vue'
 import CustomerLayout from '@/layouts/CustomerLayout.vue'
 import ProductCard from '@/components/ProductCard.vue'
 
@@ -24,6 +25,10 @@ const router = createRouter({
       path: '/login',
       name: 'login',
       component: Login
+    },
+    {path: '/productDetail',
+      name: 'productDetail',
+      component: ProductDetail
     },
     {
     path: '/profile',
