@@ -1,11 +1,15 @@
 <template>
-    <div class="h-full mx-[69px]">
-        <ShowCase :images="imageList"/>
-        <div class=" mt-[69px] mb-[60px]">
+    <div class="h-full flex flex-col px-[69px]">
+        <div>
+            <ShowCase :images="imageList"/>
+        </div>
+        <div class="pt-[69px] pb-[60px]">
             <p class="text-black font-poppins-bold text-[39px]">Shop for your pet</p>
         </div>
-            <RouterLink to="/shop" class="flex justify-between"><PetCategory v-for="(cate, index) in petCategory" :key="index" :petImg="cate.img" :petName="cate.name"/></RouterLink>
-        <div class=" mt-[70px] mb-[15px]">
+        <div class="flex justify-between">
+            <PetCategory v-for="(cate, index) in petCategory" :key="index" :petImg="cate.img" :petName="cate.name"/>
+        </div>
+        <div class=" pt-[70px] pb-[15px]">
             <p class="text-black font-poppins-bold text-[39px]">Top sell brands</p>
         </div>
     </div>

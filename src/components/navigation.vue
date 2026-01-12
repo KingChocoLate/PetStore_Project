@@ -41,9 +41,6 @@
     export default {
         name: 'Navigation',
 
-        methods: {
-
-        }
     }
 </script>
 

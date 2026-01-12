@@ -6,6 +6,7 @@ import Contact from '../views/Contact.vue'
 import Register from '../views/Register.vue'
 import Login from '../views/Login.vue'
 import CustomerLayout from '@/layouts/CustomerLayout.vue'
+import ProductCard from '@/components/ProductCard.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
