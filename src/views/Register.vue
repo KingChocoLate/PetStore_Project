@@ -129,8 +129,8 @@ export default defineComponent({
     const passwordVisible = ref(false);
     const confirmPasswordVisible = ref(false);
     const isLoading = ref(false);
-    const notification = ref({ visible: false, message: '', type: 'success' });
-    
+    const notification = ref({ visible: false, message: '', type: 'success' as 'success' | 'error' });
+
     const passwordsMismatch = computed(() => (password.value && confirmPassword.value) && (password.value !== confirmPassword.value));
 
     const togglePasswordVisibility = () => { passwordVisible.value = !passwordVisible.value; };
@@ -144,9 +144,11 @@ export default defineComponent({
     const handleRegistration = async () => {
       if (passwordsMismatch.value) { showNotification('Passwords do not match!', 'error'); return; }
       if (!email.value || !password.value) { showNotification('Please fill in all fields.', 'error'); return; }
+
       isLoading.value = true;
       try {
-        const response = await axios.post('http://localhost:3000/api/register', {
+        // Changed to port 5000 to match your server logs
+        const response = await axios.post('http://localhost:5000/api/register', {
           email: email.value,
           password: password.value
         });
@@ -158,17 +160,14 @@ export default defineComponent({
           }, 1500);
         }
       } catch (error: any) {
+        console.error(error);
         if (error.response) {
           showNotification(error.response.data.message || 'Registration failed', 'error');
+        } else if (error.request) {
+          showNotification('Network Error: Cannot connect to server.', 'error');
         } else {
-          showNotification('Network Error: Is the server running?', 'error');
+          showNotification('An error occurred. Please try again.', 'error');
         }
-        console.error(error);
-        await authStore.register(email.value, password.value);
-        showNotification('Registration Successful!', 'success');
-        setTimeout(() => { router.push('/profile'); }, 1500);
-      } catch (error: any) {
-        showNotification(error.response?.data?.message || 'Registration failed.', 'error');
       } finally {
         isLoading.value = false;
       }
