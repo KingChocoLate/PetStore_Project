@@ -177,34 +177,39 @@ export default defineComponent({
 
     onMounted(() => {
       fetchProducts();
+      const hasSeenPromo = sessionStorage.getItem('hasSeenPromo');
 
-      // ✅ LARGER & BOLDER CUSTOM TOAST
-      const ModernToast = () => h('div', { class: 'flex items-center w-full gap-4' }, [
-         // Bigger Icon Box
-         h('div', { class: 'flex-shrink-0 w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center border border-white/20 shadow-sm' }, [
-            h('svg', { class: 'w-6 h-6 text-white drop-shadow-sm', fill: 'none', viewBox: '0 0 24 24', stroke: 'currentColor', strokeWidth: '2.5' }, [
-                 h('path', { strokeLinecap: 'round', strokeLinejoin: 'round', d: 'M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z' })
-            ])
-         ]),
-         // Text Content (Larger font size)
-         h('div', { class: 'flex-1 min-w-0' }, [
-            h('h4', { class: 'font-extrabold text-white text-lg leading-tight drop-shadow-sm' }, 'Flash Sale Alert! ⚡'),
-            h('p', { class: 'text-green-50 text-sm mt-1 font-medium' }, '20% off all Dog Food today.')
-         ]),
-         // Button (Larger)
-         h('button', {
-            class: 'bg-white text-[#009200] text-sm font-extrabold px-4 py-2 rounded-full shadow-md hover:bg-green-50 hover:scale-105 transition-all cursor-pointer'
-         }, 'Shop')
-      ]);
+      if (!hasSeenPromo) {
 
-      setTimeout(() => {
-        toast(ModernToast, {
-            timeout: 8000,
-            closeButton: true,
-            icon: false,
-            toastClassName: "petstore-modern-toast",
-        });
-      }, 2000);
+          // Define the Toast Component
+          const ModernToast = () => h('div', { class: 'flex items-center w-full gap-4' }, [
+             h('div', { class: 'flex-shrink-0 w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center border border-white/20 shadow-sm' }, [
+                h('svg', { class: 'w-6 h-6 text-white drop-shadow-sm', fill: 'none', viewBox: '0 0 24 24', stroke: 'currentColor', strokeWidth: '2.5' }, [
+                     h('path', { strokeLinecap: 'round', strokeLinejoin: 'round', d: 'M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z' })
+                ])
+             ]),
+             h('div', { class: 'flex-1 min-w-0' }, [
+                h('h4', { class: 'font-extrabold text-white text-lg leading-tight drop-shadow-sm' }, 'Flash Sale Alert! ⚡'),
+                h('p', { class: 'text-green-50 text-sm mt-1 font-medium' }, '20% off all Dog Food today.')
+             ]),
+             h('button', {
+                class: 'bg-white text-[#009200] text-sm font-extrabold px-4 py-2 rounded-full shadow-md hover:bg-green-50 hover:scale-105 transition-all cursor-pointer'
+             }, 'Shop')
+          ]);
+
+          // Trigger the Toast
+          setTimeout(() => {
+            toast(ModernToast, {
+                timeout: 8000,
+                closeButton: true,
+                icon: false,
+                toastClassName: "petstore-modern-toast",
+            });
+
+            sessionStorage.setItem('hasSeenPromo', 'true');
+
+          }, 2000);
+      }
     });
 
     return {

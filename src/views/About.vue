@@ -156,9 +156,6 @@
       </div>
     </section>
 
-    <footer class="bg-white border-t border-gray-100 py-8 text-center">
-      <p class="text-gray-500 text-sm">&copy; 2025 PetStore+. All rights reserved.</p>
-    </footer>
 
   </div>
 </template>

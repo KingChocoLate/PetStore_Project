@@ -1,89 +1,154 @@
 <template>
-    <div class="whole_nav">
-        <RouterLink to="/"><img src="@/assets/project_logo.svg" alt="PetStore Logo"></RouterLink>
+    <nav class="fixed top-0 left-0 right-0 z-50 transition-all duration-300 bg-white/80 backdrop-blur-md border-b border-gray-100/50">
+        <div class="max-w-[1440px] mx-auto px-6 md:px-12 h-[80px] flex items-center justify-between">
 
-        <div class="nav_links">
-            <ul class="nav_items">
-                <li><RouterLink to="/home">Home</RouterLink></li>
-                <li><RouterLink to="/shop">Shop</RouterLink></li>
-                <li><RouterLink to="/about">About</RouterLink></li>
-                <li><RouterLink to="/contact">Contact</RouterLink></li>
+            <RouterLink to="/" class="flex-shrink-0 transform hover:scale-105 transition-transform duration-300">
+                <img src="@/assets/project_logo.svg" alt="PetStore" class="h-10 w-auto">
+            </RouterLink>
+
+            <ul class="hidden md:flex items-center gap-10">
+                <li v-for="link in links" :key="link.path" class="relative group">
+                    <RouterLink
+                        :to="link.path"
+                        active-class="text-[#009200] font-bold"
+                        class="text-gray-600 font-medium text-[15px] transition-colors duration-300 hover:text-[#009200] py-2"
+                    >
+                        {{ link.name }}
+                    </RouterLink>
+                    <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-[#009200] transition-all duration-300 ease-out group-hover:w-full rounded-full"></span>
+                </li>
             </ul>
-        </div>
 
-        <div class="action_icons">
+            <div class="flex items-center gap-5">
 
-            <div class="searchWrapper">
-                <svg width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M16.6 18L10.3 11.7C9.8 12.1 9.225 12.4167 8.575 12.65C7.925 12.8833 7.23333 13 6.5 13C4.68333 13 3.14583 12.3708 1.8875 11.1125C0.629167 9.85417 0 8.31667 0 6.5C0 4.68333 0.629167 3.14583 1.8875 1.8875C3.14583 0.629167 4.68333 0 6.5 0C8.31667 0 9.85417 0.629167 11.1125 1.8875C12.3708 3.14583 13 4.68333 13 6.5C13 7.23333 12.8833 7.925 12.65 8.575C12.4167 9.225 12.1 9.8 11.7 10.3L18 16.6L16.6 18ZM6.5 11C7.75 11 8.8125 10.5625 9.6875 9.6875C10.5625 8.8125 11 7.75 11 6.5C11 5.25 10.5625 4.1875 9.6875 3.3125C8.8125 2.4375 7.75 2 6.5 2C5.25 2 4.1875 2.4375 3.3125 3.3125C2.4375 4.1875 2 5.25 2 6.5C2 7.75 2.4375 8.8125 3.3125 9.6875C4.1875 10.5625 5.25 11 6.5 11Z" fill="black"/>
-                </svg>
-                <input
-                    type="search"
-                    class="Search"
-                    placeholder="Search products..."
-                    v-model="searchQuery"
-                    @keyup.enter="handleSearch"
-                >
-            </div>
+                <div class="relative flex items-center">
+                    <div
+                        class="overflow-hidden transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)]"
+                        :class="isSearchOpen ? 'w-48 sm:w-64 opacity-100 mr-3' : 'w-0 opacity-0'"
+                    >
+                        <input
+                            ref="searchInput"
+                            type="text"
+                            v-model="searchQuery"
+                            @keyup.enter="handleSearch"
+                            placeholder="Search essentials..."
+                            class="w-full h-10 pl-4 pr-4 bg-gray-100/80 border border-transparent rounded-full text-sm outline-none focus:bg-white focus:border-[#009200] focus:ring-4 focus:ring-green-100/50 transition-all placeholder:text-gray-400 text-gray-700"
+                        >
+                    </div>
 
-            <RouterLink to="/wishlist">
-                <svg width="20" height="22" viewBox="0 0 14 25" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M0 25V2.77778C0 2.01389 0.195833 1.35995 0.5875 0.815972C0.979167 0.271991 1.45 0 2 0H12C12.55 0 13.0208 0.271991 13.4125 0.815972C13.8042 1.35995 14 2.01389 14 2.77778V25L7 20.8333L0 25ZM2 20.7639L7 17.7778L12 20.7639V2.77778H2V20.7639Z"/>
-                </svg>
-            </RouterLink>
-
-            <RouterLink to="/cart" class="relative group">
-                <svg width="20" height="20" viewBox="0 0 25 25" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M7.2517 25C6.58696 25 6.0179 24.7552 5.54453 24.2656C5.07115 23.776 4.83447 23.1875 4.83447 22.5C4.83447 21.8125 5.07115 21.224 5.54453 20.7344C6.0179 20.2448 6.58696 20 7.2517 20C7.91644 20 8.4855 20.2448 8.95887 20.7344C9.43225 21.224 9.66893 21.8125 9.66893 22.5C9.66893 23.1875 9.43225 23.776 8.95887 24.2656C8.4855 24.7552 7.91644 25 7.2517 25ZM19.3379 25C18.6731 25 18.1041 24.7552 17.6307 24.2656C17.1573 23.776 16.9206 23.1875 16.9206 22.5C16.9206 21.8125 17.1573 21.224 17.6307 20.7344C18.1041 20.2448 18.6731 20 19.3379 20C20.0026 20 20.5717 20.2448 21.045 20.7344C21.5184 21.224 21.7551 21.8125 21.7551 22.5C21.7551 23.1875 21.5184 23.776 21.045 24.2656C20.5717 24.7552 20.0026 25 19.3379 25ZM6.22438 5L9.12506 11.25H17.5854L20.9091 5H6.22438ZM5.07619 2.5H22.9033C23.3666 2.5 23.7191 2.71354 23.9608 3.14062C24.2025 3.56771 24.2126 4 23.991 4.4375L19.7005 12.4375C19.4789 12.8542 19.1818 13.1771 18.8091 13.4062C18.4364 13.6354 18.0285 13.75 17.5854 13.75H8.58118L7.2517 16.25H21.7551V18.75H7.2517C6.34524 18.75 5.66035 18.3385 5.19705 17.5156C4.73375 16.6927 4.7136 15.875 5.13662 15.0625L6.76825 12L2.41723 2.5H0V0H3.928L5.07619 2.5Z"/>
-                </svg>
-
-                <div
-                    v-if="cartStore.totalItems > 0"
-                    class="absolute -top-3 -right-3 bg-[#FF3B30] text-white text-[11px] font-bold w-5 h-5 flex items-center justify-center rounded-full border-2 border-white shadow-sm"
-                >
-                    {{ cartStore.totalItems }}
+                    <button
+                        @click="toggleSearch"
+                        class="w-10 h-10 flex items-center justify-center rounded-full text-gray-700 hover:bg-green-50 hover:text-[#009200] transition-all duration-300 active:scale-90"
+                        title="Search"
+                    >
+                        <svg v-if="!isSearchOpen" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                        <svg v-else width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                    </button>
                 </div>
-            </RouterLink>
 
-            <RouterLink to="/profile">
-                <svg width="32" height="30" viewBox="0 0 27 25" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M5.05312 18.875C6.16875 18.0625 7.41562 17.4219 8.79375 16.9531C10.1719 16.4844 11.6156 16.25 13.125 16.25C14.6344 16.25 16.0781 16.4844 17.4562 16.9531C18.8344 17.4219 20.0812 18.0625 21.1969 18.875C21.9625 18.0208 22.5586 17.0521 22.9852 15.9688C23.4117 14.8854 23.625 13.7292 23.625 12.5C23.625 9.72917 22.6023 7.36979 20.557 5.42188C18.5117 3.47396 16.0344 2.5 13.125 2.5C10.2156 2.5 7.73828 3.47396 5.69297 5.42188C3.64766 7.36979 2.625 9.72917 2.625 12.5C2.625 13.7292 2.83828 14.8854 3.26484 15.9688C3.69141 17.0521 4.2875 18.0208 5.05312 18.875ZM13.125 13.75C11.8344 13.75 10.7461 13.3281 9.86016 12.4844C8.97422 11.6406 8.53125 10.6042 8.53125 9.375C8.53125 8.14583 8.97422 7.10938 9.86016 6.26562C10.7461 5.42188 11.8344 5 13.125 5C14.4156 5 15.5039 5.42188 16.3898 6.26562C17.2758 7.10938 17.7187 8.14583 17.7187 9.375C17.7187 10.6042 17.2758 11.6406 16.3898 12.4844C15.5039 13.3281 14.4156 13.75 13.125 13.75ZM13.125 25C11.3094 25 9.60312 24.6719 8.00625 24.0156C6.40937 23.3594 5.02031 22.4688 3.83906 21.3438C2.65781 20.2188 1.72266 18.8958 1.03359 17.375C0.344531 15.8542 0 14.2292 0 12.5C0 10.7708 0.344531 9.14583 1.03359 7.625C1.72266 6.10417 2.65781 4.78125 3.83906 3.65625C5.02031 2.53125 6.40937 1.64062 8.00625 0.984375C9.60312 0.328125 11.3094 0 13.125 0C14.9406 0 16.6469 0.328125 18.2437 0.984375C19.8406 1.64062 21.2297 2.53125 22.4109 3.65625C23.5922 4.78125 24.5273 6.10417 25.2164 7.625C25.9055 9.14583 26.25 10.7708 26.25 12.5C26.25 14.2292 25.9055 15.8542 25.2164 17.375C24.5273 18.8958 23.5922 20.2188 22.4109 21.3438C21.2297 22.4688 19.8406 23.3594 18.2437 24.0156C16.6469 24.6719 14.9406 25 13.125 25ZM13.125 22.5C14.2844 22.5 15.3781 22.3385 16.4062 22.0156C17.4344 21.6927 18.375 21.2292 19.2281 20.625C18.375 20.0208 17.4344 19.5573 16.4062 19.2344C15.3781 18.9115 14.2844 18.75 13.125 18.75C11.9656 18.75 10.8719 18.9115 9.84375 19.2344C8.81562 19.5573 7.875 20.0208 7.02187 20.625C7.875 21.2292 8.81562 21.6927 9.84375 22.0156C10.8719 22.3385 11.9656 22.5 13.125 22.5ZM13.125 11.25C13.6937 11.25 14.1641 11.0729 14.5359 10.7188C14.9078 10.3646 15.0937 9.91667 15.0937 9.375C15.0937 8.83333 14.9078 8.38542 14.5359 8.03125C14.1641 7.67708 13.6937 7.5 13.125 7.5C12.5562 7.5 12.0859 7.67708 11.7141 8.03125C11.3422 8.38542 11.1562 8.83333 11.1562 9.375C11.1562 9.91667 11.3422 10.3646 11.7141 10.7188C12.0859 11.0729 12.5562 11.25 13.125 11.25Z"/>
-                </svg>
-            </RouterLink>
+                <div class="h-6 w-px bg-gray-200 mx-1 hidden sm:block"></div>
 
+                <div v-if="authStore.isAuthenticated" class="flex items-center gap-4">
+
+                    <RouterLink to="/wishlist" class="relative group p-2 text-gray-700 hover:text-[#009200] transition-colors" title="My Wishlist">
+                        <svg class="w-6 h-6 transition-transform duration-300 group-hover:-translate-y-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                    </RouterLink>
+
+                    <RouterLink to="/cart" class="relative group p-2 text-gray-700 hover:text-[#009200] transition-colors" title="Shopping Cart">
+                        <div class="relative">
+                            <svg class="w-6 h-6 transition-transform duration-300 group-hover:-translate-y-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+                            <transition name="bounce">
+                                <span v-if="cartStore.totalItems > 0" class="absolute -top-1 -right-1 bg-[#E63946] text-white text-[10px] font-bold h-4 w-4 rounded-full flex items-center justify-center ring-2 ring-white shadow-sm">
+                                    {{ cartStore.totalItems }}
+                                </span>
+                            </transition>
+                        </div>
+                    </RouterLink>
+
+                    <RouterLink to="/profile" class="hidden sm:flex items-center justify-center w-10 h-10 rounded-full border border-gray-200 text-gray-700 hover:border-[#009200] hover:text-[#009200] hover:bg-green-50 transition-all duration-300" title="My Profile">
+                        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                    </RouterLink>
+                </div>
+
+                <div v-else class="flex items-center gap-3">
+                    <RouterLink to="/login" class="hidden sm:block text-sm font-bold text-gray-600 hover:text-[#009200] transition-colors">
+                        Log In
+                    </RouterLink>
+                    <RouterLink to="/register" class="px-5 py-2.5 bg-[#009200] text-white text-sm font-bold rounded-full shadow-lg shadow-green-200 hover:bg-[#007a00] hover:scale-105 transition-all duration-300">
+                        Sign Up
+                    </RouterLink>
+                </div>
+
+            </div>
         </div>
-    </div>
+    </nav>
 
+    <div class="h-[80px]"></div>
 </template>
-
 
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
 import { useCartStore } from '@/stores/cart';
-import { useRouter } from 'vue-router'; // 1. Import Router
+import { useAuthStore } from '@/stores/auth'; // 1. Import Auth Store
+import { useRouter } from 'vue-router';
 
 export default defineComponent({
     name: 'Navigation',
     setup() {
         const cartStore = useCartStore();
-        const router = useRouter(); // 2. Setup Router
-        const searchQuery = ref(''); // 3. Variable to hold text
+        const authStore = useAuthStore(); // 2. Initialize Auth Store
+        const router = useRouter();
 
-        const handleSearch = () => {
-            if (searchQuery.value.trim()) {
-                // 4. Go to Shop page with the search text in the URL
-                router.push({ name: 'shop', query: { q: searchQuery.value } });
-                // Optional: Clear input after search
-                // searchQuery.value = '';
+        const searchQuery = ref('');
+        const isSearchOpen = ref(false);
+        const searchInput = ref<HTMLInputElement | null>(null);
+
+        const links = [
+            { name: 'Home', path: '/home' },
+            { name: 'Shop', path: '/shop' },
+            { name: 'About', path: '/about' },
+            { name: 'Contact', path: '/contact' }
+        ];
+
+        const toggleSearch = () => {
+            isSearchOpen.value = !isSearchOpen.value;
+            if (isSearchOpen.value) {
+                setTimeout(() => {
+                    searchInput.value?.focus();
+                }, 100);
             }
         };
 
-        return { cartStore, searchQuery, handleSearch };
+        const handleSearch = () => {
+            if (searchQuery.value.trim()) {
+                router.push({ name: 'shop', query: { q: searchQuery.value } });
+                isSearchOpen.value = false;
+            }
+        };
+
+        return {
+            cartStore,
+            authStore, // 3. Return authStore so template can check isAuthenticated
+            searchQuery,
+            isSearchOpen,
+            searchInput,
+            handleSearch,
+            toggleSearch,
+            links
+        };
     }
 });
 </script>
 
 <style scoped>
+/* Bounce Animation for Cart Badge */
+.bounce-enter-active { animation: bounce-in 0.5s; }
+.bounce-leave-active { animation: bounce-in 0.5s reverse; }
+@keyframes bounce-in {
+  0% { transform: scale(0); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
     /* ... YOUR ORIGINAL STYLES REMAIN UNCHANGED ... */
     .whole_nav {
         width: 100%;
