@@ -1,89 +1,135 @@
 <template>
-    <div class="sidebar w-[250px] h-full flex flex-col items-center bg-[#F6F6F6]">
-        <img src="../../assets/project_logo.svg" alt="" class="w-[153.22px] h-[44.2px] mt-10">
-        <div class="sidebar_menu mt-[80.8px] flex flex-col gap-[30px] mb-[80.8px]">
-            <RouterLink to="/admin/dashboard"><div>
-                <div>
-                    <img src="../../assets/Admin_icons/SideBar/dashboard.svg" alt="">
-                </div>
-                <button>Dashboard</button>
-            </div>
-            </RouterLink>
-            <RouterLink to="/admin/products"><div>
-                <div>
-                    <img src="../../assets/Admin_icons/SideBar/products.svg" alt="">
-                </div>
-                <button>Products</button>
-            </div>
-            </RouterLink>
-            <RouterLink to="/admin/orders"><div>
-                <div>
-                    <img src="../../assets/Admin_icons/SideBar/orders.svg" alt="">
-                </div>
-                <button>Orders</button>
-            </div>
-            </RouterLink>
-            <RouterLink to="/admin/customers"><div>
-                <div>
-                    <img src="../../assets/Admin_icons/SideBar/customers.svg" alt="">
-                </div>
-                <button>Customers</button>
-            </div>
-            </RouterLink>
-            <RouterLink to="/admin/promotions"><div>
-                <div>
-                    <img src="../../assets/Admin_icons/SideBar/promotions.svg" alt="">
-                </div>
-                <button>Promotions</button>
-            </div>
-            </RouterLink>
-        </div>
+  <aside class="w-full h-full bg-white flex flex-col border-r border-slate-200">
+    <!-- Logo -->
+    <div class="px-6 pt-8 pb-5">
+      <img
+        src="../../assets/project_logo.svg"
+        alt="PetStore Logo"
+        class="w-[153px] h-[44px] object-contain select-none"
+      />
+
+      <!-- Small label to feel like a system (subtle) -->
+      <p class="pt-4 text-[11px] font-semibold tracking-wide uppercase text-slate-400">
+        Admin Menu
+      </p>
     </div>
+
+    <!-- Nav -->
+    <nav class="px-4 pb-6 overflow-y-auto">
+      <div class="flex flex-col gap-1.5">
+        <!-- Dashboard -->
+        <RouterLink to="/admin/dashboard" custom v-slot="{ href, navigate, isActive }">
+          <a
+            :href="href"
+            @click="navigate"
+            class="group relative flex items-center gap-3 px-4 h-[46px] rounded-xl transition-all duration-200 font-poppins font-semibold text-sm outline-none"
+            :class="isActive
+              ? 'bg-[#CBDAAF] text-slate-900 shadow-sm ring-1 ring-[#BFD3A0]'
+              : 'text-slate-800 hover:bg-slate-50'"
+          >
+            <div class="w-[24px] h-[24px] flex items-center justify-center flex-shrink-0">
+              <img
+                src="../../assets/Admin_icons/SideBar/dashboard.svg"
+                alt="Dashboard"
+                class="w-full h-full transition-transform duration-200 group-hover:scale-105"
+              />
+            </div>
+            <span>Dashboard</span>
+          </a>
+        </RouterLink>
+
+        <!-- Products -->
+        <RouterLink to="/admin/products" custom v-slot="{ href, navigate, isActive }">
+          <a
+            :href="href"
+            @click="navigate"
+            class="group relative flex items-center gap-3 px-4 h-[46px] rounded-xl transition-all duration-200 font-poppins font-semibold text-sm outline-none"
+            :class="isActive
+              ? 'bg-[#CBDAAF] text-slate-900 shadow-sm ring-1 ring-[#BFD3A0]'
+              : 'text-slate-800 hover:bg-slate-50'"
+          >
+            <div class="w-[24px] h-[24px] flex items-center justify-center flex-shrink-0">
+              <img
+                src="../../assets/Admin_icons/SideBar/products.svg"
+                alt="Products"
+                class="w-full h-full transition-transform duration-200 group-hover:scale-105"
+              />
+            </div>
+            <span>Products</span>
+          </a>
+        </RouterLink>
+
+        <!-- Orders -->
+        <RouterLink to="/admin/orders" custom v-slot="{ href, navigate, isActive }">
+          <a
+            :href="href"
+            @click="navigate"
+            class="group relative flex items-center gap-3 px-4 h-[46px] rounded-xl transition-all duration-200 font-poppins font-semibold text-sm outline-none"
+            :class="isActive
+              ? 'bg-[#CBDAAF] text-slate-900 shadow-sm ring-1 ring-[#BFD3A0]'
+              : 'text-slate-800 hover:bg-slate-50'"
+          >
+            <div class="w-[24px] h-[24px] flex items-center justify-center flex-shrink-0">
+              <img
+                src="../../assets/Admin_icons/SideBar/orders.svg"
+                alt="Orders"
+                class="w-full h-full transition-transform duration-200 group-hover:scale-105"
+              />
+            </div>
+            <span>Orders</span>
+          </a>
+        </RouterLink>
+
+        <!-- Customers -->
+        <RouterLink to="/admin/customers" custom v-slot="{ href, navigate, isActive }">
+          <a
+            :href="href"
+            @click="navigate"
+            class="group relative flex items-center gap-3 px-4 h-[46px] rounded-xl transition-all duration-200 font-poppins font-semibold text-sm outline-none"
+            :class="isActive
+              ? 'bg-[#CBDAAF] text-slate-900 shadow-sm ring-1 ring-[#BFD3A0]'
+              : 'text-slate-800 hover:bg-slate-50'"
+          >
+            <div class="w-[24px] h-[24px] flex items-center justify-center flex-shrink-0">
+              <img
+                src="../../assets/Admin_icons/SideBar/customers.svg"
+                alt="Customers"
+                class="w-full h-full transition-transform duration-200 group-hover:scale-105"
+              />
+            </div>
+            <span>Customers</span>
+          </a>
+        </RouterLink>
+
+        <!-- Promotions -->
+        <RouterLink to="/admin/promotions" custom v-slot="{ href, navigate, isActive }">
+          <a
+            :href="href"
+            @click="navigate"
+            class="group relative flex items-center gap-3 px-4 h-[46px] rounded-xl transition-all duration-200 font-poppins font-semibold text-sm outline-none"
+            :class="isActive
+              ? 'bg-[#CBDAAF] text-slate-900 shadow-sm ring-1 ring-[#BFD3A0]'
+              : 'text-slate-800 hover:bg-slate-50'"
+          >
+            <div class="w-[24px] h-[24px] flex items-center justify-center flex-shrink-0">
+              <img
+                src="../../assets/Admin_icons/SideBar/promotions.svg"
+                alt="Promotions"
+                class="w-full h-full transition-transform duration-200 group-hover:scale-105"
+              />
+            </div>
+            <span>Promotions</span>
+          </a>
+        </RouterLink>
+      </div>
+    </nav>
+
+    <!-- Optional footer hook (kept, but pushed to bottom neatly) -->
+    <div id="sidebar-footer-content" class="mt-auto w-full px-6 pb-6 flex flex-col gap-2"></div>
+  </aside>
 </template>
+
 <script lang="ts">
-    export default {
-        name: 'SideBar',
-    }
+import { defineComponent } from "vue";
+export default defineComponent({ name: "SideBar" });
 </script>
-
-<style scoped>
-    .sidebar_menu div {
-        width: 186px;
-        height: 41px;
-        border: none;
-        border-radius: 5px;
-        background-color: white;
-        font-family: 'Poppins', sans-serif;
-        font-weight: 600;
-        font-size: 14px;
-        color: #000000;
-        text-align: center;
-
-        display: flex;
-        align-items: center;
-        padding-left: 10px;
-        gap: 20px;
-    }
-
-    .sidebar_menu div:hover,
-    .sidebar_menu div:hover div {
-        background-color: #CBDAAF;
-        cursor: pointer;
-    }
-
-    .sidebar_menu div button {
-        border: none;
-        background-color: transparent;
-    }
-
-    .sidebar_menu div div {
-        width: 24px;
-        height: 24px;
-        padding: 0px;
-    }
-
-    .sidebar_menu a.router-link-active div,
-    .sidebar_menu a.router-link-active div div {
-        background-color: #CBDAAF;
-    }
-</style>

@@ -1,6 +1,5 @@
 <template>
   <div class="register-container">
-
     <transition name="fade">
       <div v-if="notification.visible" :class="['toast-notification', notification.type]">
         <span class="toast-icon">
@@ -16,7 +15,6 @@
       <div class="theme-banner">
         <div class="slogan-content">
           <img :src="sloganImage" alt="Where Pets Are Family" class="slogan-img" />
-
           <div class="visual-elements">
             <img :src="birdhouseImage" alt="Birdhouse" class="birdhouse-img" />
             <img :src="pawsImage" alt="Paws" class="paws-img" />
@@ -109,6 +107,9 @@
 <script lang="ts">
 import { defineComponent, ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
+import axios from 'axios';
+
+// Import Assets
 import { useAuthStore } from '@/stores/auth';
 
 import sloganImage from '../assets/photos/texts.png';
@@ -129,7 +130,7 @@ export default defineComponent({
     const confirmPasswordVisible = ref(false);
     const isLoading = ref(false);
     const notification = ref({ visible: false, message: '', type: 'success' });
-
+    
     const passwordsMismatch = computed(() => (password.value && confirmPassword.value) && (password.value !== confirmPassword.value));
 
     const togglePasswordVisibility = () => { passwordVisible.value = !passwordVisible.value; };
@@ -145,6 +146,24 @@ export default defineComponent({
       if (!email.value || !password.value) { showNotification('Please fill in all fields.', 'error'); return; }
       isLoading.value = true;
       try {
+        const response = await axios.post('http://localhost:3000/api/register', {
+          email: email.value,
+          password: password.value
+        });
+
+        if (response.status === 201) {
+          showNotification('Registration Successful! Redirecting...', 'success');
+          setTimeout(() => {
+            router.push('/login');
+          }, 1500);
+        }
+      } catch (error: any) {
+        if (error.response) {
+          showNotification(error.response.data.message || 'Registration failed', 'error');
+        } else {
+          showNotification('Network Error: Is the server running?', 'error');
+        }
+        console.error(error);
         await authStore.register(email.value, password.value);
         showNotification('Registration Successful!', 'success');
         setTimeout(() => { router.push('/profile'); }, 1500);
@@ -156,10 +175,21 @@ export default defineComponent({
     };
 
     return {
-      email, password, confirmPassword, passwordVisible, confirmPasswordVisible,
-      passwordsMismatch, isLoading, notification,
-      togglePasswordVisibility, toggleConfirmPasswordVisibility, handleRegistration,
-      sloganImage, birdhouseImage, pawsImage, petsImage
+      email,
+      password,
+      confirmPassword,
+      passwordVisible,
+      confirmPasswordVisible,
+      passwordsMismatch,
+      isLoading,
+      notification,
+      togglePasswordVisibility,
+      toggleConfirmPasswordVisibility,
+      handleRegistration,
+      sloganImage,
+      birdhouseImage,
+      pawsImage,
+      petsImage,
     };
   },
 });
@@ -228,6 +258,9 @@ export default defineComponent({
 .input-group { margin-bottom: 18px; }
 .input-group label { display: block; font-weight: 700; margin-bottom: 8px; font-size: 0.95rem; color: #000; }
 
+/* Input Styling */
+.input-group { margin-bottom: 20px; }
+.input-group label { display: block; font-weight: 700; margin-bottom: 8px; }
 .input-wrapper {
   display: flex; align-items: center; border: 1px solid #D1D5DB; border-radius: 10px;
   height: 50px; padding: 0 15px; transition: all 0.2s ease; background-color: #fff;
@@ -242,6 +275,7 @@ export default defineComponent({
 
 .error-message { color: #d8000c; font-size: 0.85rem; margin-top: 5px; font-weight: 500; }
 
+/* Buttons */
 .register-button {
   width: 100%; padding: 16px; background-color: #009200; color: #fff;
   border: none; border-radius: 10px; font-size: 1.1rem; font-weight: 700;
@@ -268,6 +302,7 @@ export default defineComponent({
 .login-link .link { color: #009200; font-weight: 700; text-decoration: none; margin-left: 4px; }
 .login-link .link:hover { text-decoration: underline; }
 
+/* Responsive */
 @media (max-width: 992px) {
   .card-wrapper { flex-direction: column; height: auto; max-height: 90vh; overflow-y: auto; }
   .theme-banner { flex: 0 0 300px; padding-top: 30px; }

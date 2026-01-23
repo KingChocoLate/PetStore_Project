@@ -149,4 +149,93 @@ export default defineComponent({
   50% { transform: scale(1.2); }
   100% { transform: scale(1); }
 }
+    /* ... YOUR ORIGINAL STYLES REMAIN UNCHANGED ... */
+    .whole_nav {
+        width: 100%;
+        height: 120px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 70px;
+        background-color: white; /* Added for safety so it's not transparent */
+    }
+
+    .nav_links {
+        font-family:'Poppins', sans-serif;
+        font-size: 18px;
+        font-weight: 600;
+    }
+
+    .nav_items {
+        list-style: none;
+        display: flex;
+        gap: 35px;
+        padding: 0;
+        margin: 0;
+    }
+
+    .nav_items a {
+        text-decoration: none;
+        color: #000000;
+    }
+
+    .nav_items a:hover {
+        color: #008C00;
+    }
+
+    .nav_items a.router-link-active {
+        color: #008C00;
+    }
+
+    .action_icons {
+        display: flex;
+        align-items: center;
+        gap: 30px;
+    }
+
+    /* Added 'group' to handle hover on SVG properly */
+    .action_icons svg {
+        fill: #000000;
+        transition: fill 0.3s ease;
+    }
+
+    .action_icons a:hover svg {
+        fill: #008C00;
+    }
+
+    .searchWrapper {
+        height: 36px;
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+    }
+
+    .Search {
+        position: absolute;
+        z-index: 10;
+        background: url(@/assets/search.svg) no-repeat 10px center;
+        background-color: white;
+        right: -1px;
+        top: 50%;
+        transform: translateY(-50%) scaleX(0);
+        transform-origin: right center;
+        width: 230px;
+        height: 42px;
+        border: 1px solid #D9D9D9;
+        border-radius: 24px;
+        padding-left: 40px;
+        opacity: 0;
+        transition: transform 0.3s ease-out, opacity 0.3s ease-out;
+        color: #000000;
+    }
+
+    .searchWrapper:hover .Search {
+        transform: translateY(-50%) scaleX(1);
+        opacity: 1;
+    }
+
+    .searchWrapper svg {
+        position: relative;
+        z-index: 0;
+    }
 </style>

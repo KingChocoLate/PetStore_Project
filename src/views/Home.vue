@@ -184,6 +184,17 @@ import { defineComponent } from 'vue';
 import { useRouter } from 'vue-router';
 
 // Images
+import ShowCase from '@/components/ShowCase.vue';
+import PetCategory from '@/components/PetCategory.vue';
+import ProductCard from '@/components/ProductCard.vue';
+
+// Image Imports
+import img1 from '@/assets/Rectangle 34.png';
+import img2 from '@/assets/Rectangle 31.png';
+import img3 from '@/assets/Rectangle 32.png';
+import img4 from '@/assets/Rectangle 33.png';
+
+// Pet Categories
 import petImg1 from '@/assets/petImage/Rectangle 131.png';
 import petImg2 from '@/assets/petImage/Rectangle 131 (1).png';
 import petImg3 from '@/assets/petImage/Rectangle 131 (2).png';
@@ -260,4 +271,53 @@ export default defineComponent({
   50% { transform: translateY(-20px); }
 }
 .animate-bounce-slow { animation: bounce-slow 4s ease-in-out infinite; }
+</style>
+// Product Placeholders (You can replace these with real product images)
+import prodImg1 from '@/assets/petImage/Rectangle 131.png'; 
+
+// Category Placeholders
+import catFood from '@/assets/petImage/Rectangle 131.png'; 
+
+export default defineComponent({
+    name: 'Home',
+    components: {
+        ShowCase,
+        PetCategory,
+        ProductCard
+    },
+    data() {
+        return {
+            imageList: [img1, img2, img3, img4],
+            petCategory: [
+                { img: petImg1, name: "Cat" },
+                { img: petImg2, name: "Dog" },
+                { img: petImg3, name: "Small pet" },
+                { img: petImg4, name: "Bird" },
+                { img: petImg5, name: "Fish" }
+            ],
+            // Mock Data for Products
+            products: [
+                { name: "Royal Canin", price: "67.67$", img: prodImg1 },
+                { name: "Whiskas", price: "45.00$", img: prodImg1 },
+                { name: "Pedigree", price: "55.20$", img: prodImg1 },
+                { name: "Cat Chow", price: "30.50$", img: prodImg1 },
+                { name: "Friskies", price: "28.99$", img: prodImg1 },
+            ],
+            // Mock Data for Middle Categories
+            midCategories: [
+                { name: "Food", img: catFood },
+                { name: "Toy", img: catFood },
+                { name: "Accessories", img: catFood }
+            ]
+        };
+    }
+})
+</script>
+
+<style scoped>
+/* Optional: If you need specific font overrides not in Tailwind */
+.font-poppins-bold {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 700;
+}
 </style>

@@ -37,6 +37,11 @@ const router = createRouter({
 
     // 3. Main Application Routes
     {
+    path: '/profile',
+    name: 'profile',
+    component: () => import('../views/UserProfile.vue')
+    },
+    {
       path: '/',
       // ✅ CHANGE THIS LINE (Lazy Load to fix the crash):
       component: () => import('@/layouts/CustomerLayout.vue'),
