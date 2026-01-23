@@ -1,13 +1,15 @@
 <template>
-  <RouterView/>
+  <RouterView />
 </template>
 
-<script lang = "ts">
+<script lang="ts">
+  import { defineComponent } from 'vue';
   import Navigation from './components/navigation.vue';
-  export default {
+
+  export default defineComponent({
     name: 'App',
     components: {
-        Navigation
+      Navigation
     }
-  }
+  })
 </script>

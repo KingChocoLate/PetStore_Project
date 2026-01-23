@@ -1,4 +1,8 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Your custom fonts and other styles... */
 /* color palette from <https://github.com/vuejs/theme> */
 @font-face {
     font-family: 'Poppins';

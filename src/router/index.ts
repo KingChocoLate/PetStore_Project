@@ -1,21 +1,28 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
 import Home from '../views/Home.vue'
 import Shop from '../views/Shop.vue'
 import About from '../views/About.vue'
-import Contact from '../views/Contact.vue'  
+import Contact from '../views/Contact.vue'
 import Register from '../views/Register.vue'
 import Login from '../views/Login.vue'
 import ProductDetail from '@/views/ProductDetail.vue'
 import CustomerLayout from '@/layouts/CustomerLayout.vue'
-import ProductCard from '@/components/ProductCard.vue'
+import Cart from '@/views/Cart.vue'
+import Wishlist from '@/views/Wishlist.vue'
+import Checkout from '@/views/Checkout.vue'
+import OrderHistory from '@/views/OrderHistory.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
-    {path: '/',
+    // 1. Root Redirect: Send users to Home (not Login) by default
+    {
+      path: '/',
       redirect: '/home'
     },
-    // Authentication routes
+
+    // 2. Auth Pages (Public)
     {
       path: '/register',
       name: 'register',
@@ -26,10 +33,8 @@ const router = createRouter({
       name: 'login',
       component: Login
     },
-    {path: '/productDetail',
-      name: 'productDetail',
-      component: ProductDetail
-    },
+
+    // 3. Main Application Routes
     {
     path: '/profile',
     name: 'profile',
@@ -38,68 +43,69 @@ const router = createRouter({
     {
       path: '/',
       component: CustomerLayout,
+      // ❌ REMOVED "meta: { requiresAuth: true }" from here.
+      // We don't want to lock the whole layout.
       children: [
-        {
-          path: '/home',
-          name: 'home',
-          component: Home
-        },
-        {
-          path: '/shop',
-          name: 'shop',
-          component: Shop
-        },
-        {
-          path: '/about',
-          name: 'about',
-          component: About
-        },
-        {
-          path: '/contact',
-          name: 'contact',
-          component: Contact
-        },
-      ]
-    },
+        // --- PUBLIC ROUTES (Everyone can see these) ---
+        { path: '/home', name: 'home', component: Home },
+        { path: '/shop', name: 'shop', component: Shop },
+        { path: '/about', name: 'about', component: About },
+        { path: '/contact', name: 'contact', component: Contact },
+        { path: '/productDetail/:id', name: 'product-detail', component: ProductDetail },
 
-    
-
-    // Admin routes
-    {path: '/admin',
-      redirect: '/admin/dashboard'
-    },
-    {
-      path: '/admin',
-      component: () => import('@/layouts/AdminLayout.vue'),
-      children: [
+        // --- PROTECTED ROUTES (Must be logged in) ---
         {
-          path: 'dashboard',
-          name: 'admin-dashboard',
-          component: () => import('@/views/Admin/Dashboard.vue')
-        }, 
-        {
-          path: 'products',
-          name: 'admin-products',
-          component: () => import('@/views/Admin/Products.vue')
+          path: '/profile',
+          name: 'profile',
+          component: () => import('../views/UserProfile.vue'),
+          meta: { requiresAuth: true } // 🔒 Private
         },
         {
-          path: 'orders',
-          name: 'admin-orders',
-          component: () => import('@/views/Admin/Orders.vue')
-        }, 
-        {
-          path: 'customers',
-          name: 'admin-customers',
-          component: () => import('@/views/Admin/Customers.vue')
+          path: '/cart',
+          name: 'cart',
+          component: Cart,
+          meta: { requiresAuth: true } // 🔒 Private
         },
         {
-          path: 'promotions',
-          name: 'admin-promotions',
-          component: () => import('@/views/Admin/Promotions.vue')
+          path: '/wishlist',
+          name: 'wishlist',
+          component: Wishlist,
+          meta: { requiresAuth: true } // 🔒 Private
+        },
+        {
+          path: '/checkout',
+          name: 'checkout',
+          component: Checkout,
+          meta: { requiresAuth: true } // 🔒 Private
+        },
+        {
+          path: '/order-history',
+          name: 'order-history',
+          component: OrderHistory,
+          meta: { requiresAuth: true } // 🔒 Private
         }
       ]
-    }
+    },
   ],
 })
+
+// 4. Global Guard Logic
+router.beforeEach((to, from, next) => {
+  const authStore = useAuthStore();
+  const loggedIn = authStore.isAuthenticated;
+
+  // Case 1: Page requires Auth, but user is NOT logged in
+  if (to.meta.requiresAuth && !loggedIn) {
+    next('/login'); // Redirect to login
+  }
+  // Case 2: User IS logged in, but tries to go to Login or Register
+  else if ((to.name === 'login' || to.name === 'register') && loggedIn) {
+    next('/profile'); // Redirect to Profile (or Shop/Home)
+  }
+  // Case 3: Public page (Home, Shop)
+  else {
+    next(); // Allow
+  }
+});
 
 export default router
