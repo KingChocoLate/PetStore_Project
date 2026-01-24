@@ -17,7 +17,7 @@
     <div class="w-full h-48 flex items-center justify-center mb-4 overflow-hidden rounded-lg cursor-pointer">
       <router-link :to="{ name: 'product-detail', params: { id: product._id } }" class="w-full h-full">
         <img
-          :src="product.image"
+          :src="resolvedImage"
           :alt="product.name"
           class="h-full w-full object-contain transition-transform duration-500 group-hover:scale-110"
         />
@@ -27,7 +27,7 @@
     <div class="flex flex-col flex-grow">
 
       <div class="flex gap-1 mb-2">
-        <span v-for="i in 5" :key="i" class="text-orange-400 text-sm">★</span>
+        <span v-for="i in 5" :key="i" class="text-sm" :class="i <= (product.rating || 5) ? 'text-yellow-400' : 'text-gray-200'">★</span>
       </div>
 
       <h3 class="font-bold text-lg text-gray-900 mb-1 leading-tight">{{ product.name }}</h3>
@@ -59,7 +59,9 @@
 <script lang="ts">
 import { defineComponent, computed } from 'vue';
 import { useCartStore } from '@/stores/cart';
-import { useWishlistStore } from '@/stores/wishlist'; // 1. Import Wishlist Store
+import { useWishlistStore } from '@/stores/wishlist';
+
+const BACKEND_URL = "https://petstore-backend-api.onrender.com";
 
 export default defineComponent({
   name: 'ProductCard',
@@ -71,22 +73,32 @@ export default defineComponent({
   },
   setup(props) {
     const cartStore = useCartStore();
-    const wishlistStore = useWishlistStore(); // 2. Initialize it
+    const wishlistStore = useWishlistStore();
 
     const formattedPrice = computed(() => {
       return Number(props.product.price).toFixed(2);
     });
 
-    // 3. Check if this specific item is currently in the wishlist
+    // 👇 Helper to fix image URL (handles relative/absolute/missing)
+    const resolvedImage = computed(() => {
+      const path = props.product.imageUrl || props.product.image;
+      if (!path) return 'https://via.placeholder.com/300';
+      if (path.startsWith('http')) return path;
+      return `${BACKEND_URL}${path}`;
+    });
+
     const isWishlisted = computed(() => {
       return wishlistStore.isInWishlist(props.product._id);
     });
 
     const addToCart = () => {
-      cartStore.addToCart(props.product);
+      // 👇 Pass the fixed URL to the cart store so it shows up correctly in the cart
+      cartStore.addToCart({
+        ...props.product,
+        image: resolvedImage.value
+      });
     };
 
-    // 4. Toggle function (Add/Remove)
     const toggleWishlist = () => {
       wishlistStore.toggleWishlist(props.product);
     };
@@ -95,7 +107,8 @@ export default defineComponent({
       formattedPrice,
       addToCart,
       isWishlisted,
-      toggleWishlist
+      toggleWishlist,
+      resolvedImage
     };
   }
 });

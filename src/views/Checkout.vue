@@ -301,10 +301,12 @@ export default defineComponent({
     const handleCheckout = async () => {
       if (cartStore.items.length === 0) return toast.error("Your cart is empty!");
 
-      const requiredFields = ['firstName', 'lastName', 'address', 'city', 'phone'];
+      // 🟢 ADDED 'postalCode' to validation list
+      const requiredFields = ['firstName', 'lastName', 'address', 'city', 'phone', 'postalCode'];
+
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       if (requiredFields.some((f) => !form[f as keyof typeof form])) {
-        return toast.warning("Please fill in all shipping details.");
+        return toast.warning("Please fill in all shipping details, including Postal Code.");
       }
 
       isProcessing.value = true;

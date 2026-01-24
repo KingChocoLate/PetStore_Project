@@ -301,11 +301,30 @@ export default defineComponent({
       }
       isLoading.value = true
       try {
-        await authStore.login(email.value, password.value)
-        showNotification('Login Successful!', 'success')
+        // 1. Wait for login to complete
+        await authStore.login(email.value, password.value);
+        showNotification('Login Successful!', 'success');
+
+        // 2. Get User Role safely (Check Store OR LocalStorage)
+        // This ensures we get the latest data immediately
+        let user = authStore.user;
+
+        if (!user) {
+           const stored = localStorage.getItem('userInfo');
+           if (stored) user = JSON.parse(stored);
+        }
+
+        console.log("LOGIN CHECK:", user); // Check Console F12 if issues persist
+
+        // 3. Redirect based on Role
         setTimeout(() => {
-          router.push('/shop')
-        }, 1000)
+          if (user && user.role === 'admin') {
+            router.push('/admin/dashboard');
+          } else {
+            router.push('/shop');
+          }
+        }, 500);
+
       } catch (error: any) {
         showNotification(error.response?.data?.message || 'Login failed.', 'error')
       } finally {

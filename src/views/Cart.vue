@@ -93,6 +93,28 @@
               Order Summary
             </h3>
 
+            <div class="mb-6">
+              <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Promo Code</label>
+              <div class="flex gap-2">
+                <input
+                  v-model="couponCode"
+                  type="text"
+                  placeholder="Enter code"
+                  class="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm font-bold text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 uppercase"
+                >
+                <button
+                  @click="applyCoupon"
+                  :disabled="isLoadingPromo || !couponCode"
+                  class="bg-gray-900 text-white px-4 py-2.5 rounded-xl text-sm font-bold hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                >
+                  {{ isLoadingPromo ? '...' : 'Apply' }}
+                </button>
+              </div>
+              <p v-if="discount > 0" class="text-xs font-bold text-green-600 mt-2">
+                Coupon Applied! You saved ${{ discount.toFixed(2) }}
+              </p>
+            </div>
+
             <div class="space-y-4 mb-8">
               <div class="flex justify-between text-gray-500">
                 <span>Subtotal</span>
@@ -107,6 +129,11 @@
               <div class="flex justify-between text-gray-500">
                 <span>Tax (8%)</span>
                 <span class="font-bold text-gray-900">${{ tax.toFixed(2) }}</span>
+              </div>
+
+              <div v-if="discount > 0" class="flex justify-between text-[#009200]">
+                <span>Discount</span>
+                <span class="font-bold">-${{ discount.toFixed(2) }}</span>
               </div>
 
               <div class="h-px bg-gray-100 my-4"></div>
@@ -141,20 +168,58 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, computed } from 'vue';
+import { defineComponent, computed, ref } from 'vue';
 import { useCartStore } from '@/stores/cart';
+import axios from 'axios';
+import { useToast } from 'vue-toastification';
+
+const API_BASE = "https://petstore-backend-api.onrender.com/api";
 
 export default defineComponent({
   name: 'CartView',
   setup() {
     const cartStore = useCartStore();
+    const toast = useToast();
+
+    const couponCode = ref("");
+    const discount = ref(0);
+    const isLoadingPromo = ref(false);
 
     const subtotal = computed(() => cartStore.subtotal);
     const shipping = computed(() => subtotal.value > 50 ? 0 : 5.00);
     const tax = computed(() => subtotal.value * 0.08);
-    const total = computed(() => subtotal.value + shipping.value + tax.value);
 
-    return { cartStore, subtotal, shipping, tax, total };
+    // Updated total calculation
+    const total = computed(() => Math.max(0, subtotal.value + shipping.value + tax.value - discount.value));
+
+    const applyCoupon = async () => {
+      if (!couponCode.value) return;
+      isLoadingPromo.value = true;
+      discount.value = 0; // Reset previous discount
+
+      try {
+        const { data } = await axios.post(`${API_BASE}/promotions/validate`, {
+          code: couponCode.value,
+          cartTotal: subtotal.value
+        });
+
+        if (data.success) {
+          discount.value = data.discountAmount;
+          toast.success(`Coupon applied! Saved $${data.discountAmount.toFixed(2)}`);
+        }
+      } catch (error: any) {
+        const msg = error.response?.data?.message || "Invalid coupon code";
+        toast.error(msg);
+        discount.value = 0;
+      } finally {
+        isLoadingPromo.value = false;
+      }
+    };
+
+    return {
+      cartStore, subtotal, shipping, tax, total,
+      couponCode, discount, applyCoupon, isLoadingPromo
+    };
   }
 });
 </script>

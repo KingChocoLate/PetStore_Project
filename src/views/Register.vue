@@ -388,7 +388,7 @@ export default defineComponent({
 
       try {
         // Changed to port 5000 to match your server logs
-        const response = await axios.post('http://localhost:5000/api/register', {
+        const response = await axios.post('https://petstore-backend-api.onrender.com/api/auth/register', {
           email: email.value,
           password: password.value,
         })

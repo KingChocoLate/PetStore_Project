@@ -1,9 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 
-// ❌ DELETE OR COMMENT OUT THIS LINE:
-// import CustomerLayout from '@/layouts/CustomerLayout.vue'
-
 // Views
 import Home from '../views/Home.vue'
 import Shop from '../views/Shop.vue'
@@ -41,67 +38,37 @@ const router = createRouter({
       ],
     },
 
-    // 3. Main Application Routes
-    {
-      path: '/profile',
-      name: 'profile',
-      component: () => import('../views/UserProfile.vue'),
-    },
+    // 3. Main Application Routes (Customer)
     {
       path: '/',
-      // ✅ CHANGE THIS LINE (Lazy Load to fix the crash):
       component: () => import('@/layouts/CustomerLayout.vue'),
       children: [
-        { path: '/home', name: 'home', component: Home },
-        { path: '/shop', name: 'shop', component: Shop },
-        { path: '/about', name: 'about', component: About },
-        { path: '/contact', name: 'contact', component: Contact },
-        { path: '/productDetail/:id', name: 'product-detail', component: ProductDetail },
+        { path: 'home', name: 'home', component: Home },
+        { path: 'shop', name: 'shop', component: Shop },
+        { path: 'about', name: 'about', component: About },
+        { path: 'contact', name: 'contact', component: Contact },
+        { path: 'productDetail/:id', name: 'product-detail', component: ProductDetail },
 
         // --- PROTECTED ROUTES ---
-        {
-          path: '/profile',
-          name: 'profile',
-          component: UserProfile,
-          meta: { requiresAuth: true },
-        },
-        {
-          path: '/cart',
-          name: 'cart',
-          component: Cart,
-          meta: { requiresAuth: true },
-        },
-        {
-          path: '/wishlist',
-          name: 'wishlist',
-          component: Wishlist,
-          meta: { requiresAuth: true },
-        },
-        {
-          path: '/checkout',
-          name: 'checkout',
-          component: Checkout,
-          meta: { requiresAuth: true },
-        },
-        {
-          path: '/order-history',
-          name: 'order-history',
-          component: OrderHistory,
-          meta: { requiresAuth: true },
-        },
-      ],
+        { path: 'profile', name: 'profile', component: UserProfile, meta: { requiresAuth: true } },
+        { path: 'cart', name: 'cart', component: Cart, meta: { requiresAuth: true } },
+        { path: 'wishlist', name: 'wishlist', component: Wishlist, meta: { requiresAuth: true } },
+        { path: 'checkout', name: 'checkout', component: Checkout, meta: { requiresAuth: true } },
+        { path: 'order-history', name: 'order-history', component: OrderHistory, meta: { requiresAuth: true } }
+      ]
     },
 
-    // Admin routes
-    { path: '/admin', redirect: '/admin/dashboard' },
+    // 4. ADMIN ROUTES (Secured)
     {
       path: '/admin',
       component: () => import('@/layouts/AdminLayout.vue'),
+      meta: { requiresAdmin: true },
+      redirect: '/admin/dashboard',
       children: [
         {
           path: 'dashboard',
           name: 'admin-dashboard',
-          component: () => import('@/views/Admin/Dashboard.vue'),
+          component: () => import('@/views/Admin/Dashboard.vue')
         },
         {
           path: 'products',
@@ -111,7 +78,7 @@ const router = createRouter({
         {
           path: 'orders',
           name: 'admin-orders',
-          component: () => import('@/views/Admin/Orders.vue'),
+          component: () => import('@/views/Admin/Orders.vue')
         },
         {
           path: 'customers',
@@ -125,24 +92,50 @@ const router = createRouter({
         },
       ],
     },
+
+    // Catch-all for 404
+    {
+        path: '/:pathMatch(.*)*',
+        redirect: '/'
+    }
   ],
 })
 
-// 4. Global Guard Logic
+// 5. Global Guard Logic
 router.beforeEach((to, from, next) => {
-  const authStore = useAuthStore()
-  const loggedIn = authStore.isAuthenticated
+  const authStore = useAuthStore();
+  const loggedIn = authStore.isAuthenticated;
+  const user = authStore.user;
 
-  if (to.meta.requiresAuth && !loggedIn) {
-    next('/login')
-  } else if (
-    (to.name === 'login' || to.name === 'register' || to.name === 'forgot-password') &&
-    loggedIn
-  ) {
-    next('/profile')
-  } else {
-    next()
+  // 1. Check for Admin Access
+  if (to.matched.some(record => record.meta.requiresAdmin)) {
+    if (!loggedIn) {
+      next('/login');
+    } else if (user && user.role !== 'admin') {
+      // Logged in but NOT admin -> Go Home
+      next('/');
+    } else {
+      // Is Admin -> Proceed
+      next();
+    }
   }
-})
+  // 2. Check for Standard Auth
+  else if (to.matched.some(record => record.meta.requiresAuth) && !loggedIn) {
+    next('/login');
+  }
+  // 3. Prevent Logged-in users from seeing Login/Register
+  else if ((to.name === 'login' || to.name === 'register' || to.name === 'forgot-password') && loggedIn) {
+    // 👇 UPDATED REDIRECT LOGIC 👇
+    if (user && user.role === 'admin') {
+      next('/admin/dashboard');
+    } else {
+      next('/profile'); // or '/shop'
+    }
+    // 👆 END UPDATE 👆
+  }
+  else {
+    next();
+  }
+});
 
 export default router

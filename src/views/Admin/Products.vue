@@ -1,1006 +1,372 @@
 <template>
-  <div class="w-full min-h-screen bg-slate-50 flex flex-col">
-    <main class="flex-1 w-full overflow-y-auto px-4 sm:px-8 pt-8 pb-10 flex flex-col gap-6">
-      <!-- HERO -->
-      <section class="relative overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
-        <div class="absolute inset-0 bg-gradient-to-br from-emerald-50 via-white to-slate-50"></div>
+  <div class="w-full min-h-screen">
 
-        <div class="relative p-6 sm:p-7">
-          <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-            <div class="min-w-0">
-              <div class="flex items-center gap-2 text-xs font-semibold text-slate-500">
-                <span class="px-2 py-1 rounded-lg bg-white/70 border border-slate-200">Admin</span>
-                <span>•</span>
-                <span class="truncate">Product Management & Inventory Tracking</span>
-              </div>
+    <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-8">
+      <div>
+        <h1 class="text-3xl font-black text-slate-900 tracking-tight">Inventory</h1>
+        <p class="text-slate-500 mt-1 font-medium">Manage your products, stock levels, and pricing.</p>
+      </div>
+      <button @click="openModal('create')" class="flex items-center gap-2 px-6 py-3 bg-slate-900 text-white rounded-2xl text-sm font-bold shadow-xl shadow-slate-900/20 hover:bg-slate-800 transition transform hover:-translate-y-0.5">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+        Add Product
+      </button>
+    </div>
 
-              <h1 class="mt-2 text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">Products</h1>
-              <p class="mt-1 text-sm text-slate-600">
-                Add / edit / delete products, track inventory, and export reports.
-              </p>
-            </div>
+    <div class="bg-white p-4 rounded-3xl border border-slate-200 shadow-sm mb-8 flex flex-col md:flex-row gap-4 items-center">
 
-            <div class="flex flex-col sm:flex-row gap-2 sm:items-center">
-              <button
-                type="button"
-                class="px-4 py-2 rounded-2xl bg-white border border-slate-200 hover:bg-slate-50 text-slate-800 text-xs font-extrabold shadow-sm transition"
-                @click="exportCsv"
-              >
-                Export CSV
-              </button>
-
-              <button
-                type="button"
-                class="px-4 py-2 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-extrabold shadow-sm transition"
-                @click="openCreate"
-              >
-                + Add Product
-              </button>
-            </div>
-          </div>
-
-          <!-- KPI -->
-          <div class="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-            <InfoTile label="Total products" :value="String(products.length)" hint="All SKUs" />
-            <InfoTile label="Low stock" :value="String(lowStockCount)" hint="≤ reorder level" />
-            <InfoTile label="Out of stock" :value="String(outOfStockCount)" hint="0 remaining" />
-            <InfoTile label="Featured" :value="String(featuredCount)" hint="Homepage picks" />
-          </div>
-        </div>
-      </section>
-
-      <!-- CONTROLS -->
-      <section class="rounded-3xl border border-slate-200 bg-white shadow-sm">
-        <div class="p-4 sm:p-5 flex flex-col lg:flex-row gap-3 lg:items-center lg:justify-between">
-          <div class="flex flex-col sm:flex-row gap-3 sm:items-center w-full lg:w-auto">
-            <div class="relative w-full sm:w-[340px]">
-              <input
-                v-model="q"
-                type="text"
-                placeholder="Search name, SKU, category…"
-                class="w-full h-11 px-4 pr-12 rounded-2xl border border-slate-200 bg-white text-sm font-semibold text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-300"
-              />
-              <button
-                v-if="q"
-                class="absolute right-2 top-1/2 -translate-y-1/2 px-2 py-1 text-xs font-black rounded-xl border border-slate-200 hover:bg-slate-50"
-                @click="q=''"
-                type="button"
-              >
-                Clear
-              </button>
-            </div>
-
-            <select
-              v-model="category"
-              class="h-11 px-4 rounded-2xl border border-slate-200 bg-white text-sm font-extrabold text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-300"
-            >
-              <option value="All">All categories</option>
-              <option v-for="c in categories" :key="c" :value="c">{{ c }}</option>
-            </select>
-
-            <select
-              v-model="stockFilter"
-              class="h-11 px-4 rounded-2xl border border-slate-200 bg-white text-sm font-extrabold text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-300"
-            >
-              <option value="All">All stock</option>
-              <option value="Low">Low stock</option>
-              <option value="Out">Out of stock</option>
-            </select>
-
-            <select
-              v-model="statusFilter"
-              class="h-11 px-4 rounded-2xl border border-slate-200 bg-white text-sm font-extrabold text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-300"
-            >
-              <option value="All">All status</option>
-              <option value="Active">Active</option>
-              <option value="Inactive">Inactive</option>
-            </select>
-          </div>
-
-          <div class="flex flex-col sm:flex-row gap-3 sm:items-center">
-            <select
-              v-model="sortBy"
-              class="h-11 px-4 rounded-2xl border border-slate-200 bg-white text-sm font-extrabold text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-300"
-            >
-              <option value="newest">Newest</option>
-              <option value="name_asc">Name A→Z</option>
-              <option value="price_desc">Price high→low</option>
-              <option value="stock_asc">Stock low→high</option>
-              <option value="sales_desc">Sales high→low</option>
-            </select>
-
-            <button
-              type="button"
-              class="h-11 px-4 rounded-2xl bg-white border border-slate-200 hover:bg-slate-50 text-slate-900 text-sm font-extrabold disabled:opacity-50 disabled:hover:bg-white"
-              :disabled="selectedIds.length === 0"
-              @click="bulkRestock"
-              title="Add +10 stock to selected products"
-            >
-              Restock +10 ({{ selectedIds.length }})
-            </button>
-
-            <button
-              type="button"
-              class="h-11 px-4 rounded-2xl bg-white border border-rose-200 hover:bg-rose-50 text-rose-700 text-sm font-extrabold disabled:opacity-50 disabled:hover:bg-white"
-              :disabled="selectedIds.length === 0"
-              @click="bulkDelete"
-            >
-              Delete ({{ selectedIds.length }})
-            </button>
-          </div>
-        </div>
-
-        <!-- TABLE -->
-        <div class="border-t border-slate-200 overflow-x-auto">
-          <table class="min-w-[1060px] w-full">
-            <thead>
-              <tr class="text-left text-[11px] uppercase tracking-wide text-slate-500 font-black">
-                <th class="py-3 px-4 w-[44px]">
-                  <input type="checkbox" :checked="allChecked" @change="toggleAll($event)" />
-                </th>
-                <th class="py-3 px-4">Product</th>
-                <th class="py-3 px-4">Category</th>
-                <th class="py-3 px-4">Price</th>
-                <th class="py-3 px-4">Inventory</th>
-                <th class="py-3 px-4">Sales</th>
-                <th class="py-3 px-4">Status</th>
-                <th class="py-3 px-4 text-right">Actions</th>
-              </tr>
-            </thead>
-
-            <tbody>
-              <tr
-                v-for="p in visible"
-                :key="p.id"
-                class="border-t border-slate-100 hover:bg-slate-50/70 transition"
-              >
-                <td class="py-4 px-4 align-top">
-                  <input type="checkbox" :checked="selectedIds.includes(p.id)" @change="toggleOne(p.id, $event)" />
-                </td>
-
-                <td class="py-4 px-4 align-top">
-                  <div class="flex items-center gap-3">
-                    <img
-                      :src="p.image"
-                      alt=""
-                      class="h-11 w-11 rounded-2xl border border-slate-200 object-cover bg-white"
-                    />
-                    <div class="min-w-0">
-                      <div class="flex items-center gap-2">
-                        <div class="font-black text-slate-900 truncate">{{ p.name }}</div>
-                        <span
-                          v-if="p.featured"
-                          class="text-[10px] font-black px-2 py-1 rounded-xl border bg-amber-50 text-amber-800 border-amber-200"
-                        >
-                          Featured
-                        </span>
-                      </div>
-                      <div class="text-xs font-bold text-slate-500">SKU: {{ p.sku }}</div>
-                    </div>
-                  </div>
-                </td>
-
-                <td class="py-4 px-4 align-top">
-                  <span class="text-xs font-extrabold text-slate-800 px-2 py-1 rounded-xl bg-slate-100 border border-slate-200">
-                    {{ p.category }}
-                  </span>
-                </td>
-
-                <td class="py-4 px-4 align-top">
-                  <div class="font-black text-slate-900">${{ p.price.toFixed(2) }}</div>
-                  <div class="text-xs font-bold text-slate-500">Cost: ${{ p.cost.toFixed(2) }}</div>
-                </td>
-
-                <td class="py-4 px-4 align-top">
-                  <div class="flex items-center gap-2">
-                    <span class="text-xs font-black text-slate-800">
-                      {{ p.stock }} / {{ p.totalStock }}
-                    </span>
-
-                    <span class="text-[10px] font-black px-2 py-1 rounded-xl border" :class="stockBadge(p)">
-                      {{ stockLabel(p) }}
-                    </span>
-                  </div>
-
-                  <div class="mt-2 h-2 w-[180px] rounded-full bg-slate-100 border border-slate-200 overflow-hidden">
-                    <div class="h-full bg-slate-900" :style="{ width: stockPct(p) + '%' }"></div>
-                  </div>
-
-                  <div class="mt-2 flex items-center gap-2">
-                    <button
-                      class="px-2 py-1 text-xs font-black rounded-xl border border-slate-200 hover:bg-white disabled:opacity-40"
-                      @click="adjustStock(p.id, -1)"
-                      :disabled="p.stock <= 0"
-                      title="Decrease stock"
-                      type="button"
-                    >
-                      −
-                    </button>
-                    <button
-                      class="px-2 py-1 text-xs font-black rounded-xl border border-slate-200 hover:bg-white"
-                      @click="adjustStock(p.id, +1)"
-                      title="Increase stock"
-                      type="button"
-                    >
-                      +
-                    </button>
-                    <span class="text-[11px] font-semibold text-slate-500">Reorder ≤ {{ p.reorderLevel }}</span>
-                  </div>
-                </td>
-
-                <td class="py-4 px-4 align-top">
-                  <div class="font-black text-slate-900">{{ p.sales }}</div>
-                  <div class="text-xs font-bold text-slate-500">Rating: {{ p.rating.toFixed(1) }}/5</div>
-                </td>
-
-                <td class="py-4 px-4 align-top">
-                  <span
-                    class="text-[10px] font-black px-3 py-1 rounded-xl border"
-                    :class="p.status === 'Active'
-                      ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
-                      : 'bg-slate-100 text-slate-700 border-slate-200'"
-                  >
-                    {{ p.status }}
-                  </span>
-                </td>
-
-                <td class="py-4 px-4 align-top text-right">
-                  <div class="flex justify-end gap-2">
-                    <button
-                      class="px-3 py-2 rounded-2xl bg-white border border-slate-200 hover:bg-slate-50 text-xs font-extrabold"
-                      @click="toggleFeatured(p.id)"
-                      :title="p.featured ? 'Remove featured' : 'Mark as featured'"
-                      type="button"
-                    >
-                      {{ p.featured ? 'Unfeature' : 'Feature' }}
-                    </button>
-                    <button
-                      class="px-3 py-2 rounded-2xl bg-white border border-slate-200 hover:bg-slate-50 text-xs font-extrabold"
-                      @click="openEdit(p)"
-                      type="button"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      class="px-3 py-2 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-extrabold"
-                      @click="openView(p)"
-                      type="button"
-                    >
-                      View
-                    </button>
-                    <button
-                      class="px-3 py-2 rounded-2xl bg-white border border-rose-200 hover:bg-rose-50 text-rose-700 text-xs font-extrabold"
-                      @click="confirmDelete(p)"
-                      type="button"
-                    >
-                      Delete
-                    </button>
-                  </div>
-                </td>
-              </tr>
-
-              <tr v-if="visible.length === 0">
-                <td colspan="8" class="py-12 text-center">
-                  <div class="text-slate-900 font-black">No products found</div>
-                  <div class="text-sm text-slate-600 mt-1">Try adjusting filters or search keywords.</div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <!-- FOOTER -->
-        <div class="p-4 sm:p-5 flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
-          <div class="text-xs font-semibold text-slate-600">
-            Showing <span class="font-black text-slate-900">{{ visible.length }}</span> of
-            <span class="font-black text-slate-900">{{ filtered.length }}</span> results
-          </div>
-
-          <div class="flex items-center gap-2">
-            <button
-              class="px-3 py-2 rounded-2xl bg-white border border-slate-200 hover:bg-slate-50 text-xs font-extrabold disabled:opacity-50"
-              @click="page = Math.max(1, page - 1)"
-              :disabled="page === 1"
-              type="button"
-            >
-              Prev
-            </button>
-
-            <div class="text-xs font-black text-slate-900 px-3">
-              Page {{ page }} / {{ totalPages }}
-            </div>
-
-            <button
-              class="px-3 py-2 rounded-2xl bg-white border border-slate-200 hover:bg-slate-50 text-xs font-extrabold disabled:opacity-50"
-              @click="page = Math.min(totalPages, page + 1)"
-              :disabled="page === totalPages"
-              type="button"
-            >
-              Next
-            </button>
-          </div>
-        </div>
-      </section>
-
-      <!-- TOAST -->
-      <div
-        v-if="toast"
-        class="fixed bottom-5 right-5 z-[60] px-4 py-3 rounded-2xl bg-slate-900 text-white text-xs font-extrabold shadow-lg"
-      >
-        {{ toast }}
+      <div class="relative w-full md:w-96">
+        <svg class="absolute left-4 top-3.5 w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+        <input
+          v-model="filters.search"
+          type="text"
+          placeholder="Search products..."
+          class="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-slate-700 outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition"
+        >
       </div>
 
-      <!-- MODAL: Create/Edit/View -->
-      <Modal v-if="modal.open" @close="closeModal">
-        <template #title>
-          <span v-if="modal.mode==='create'">Add Product</span>
-          <span v-else-if="modal.mode==='edit'">Edit Product</span>
-          <span v-else>Product Details</span>
-        </template>
+      <select v-model="filters.category" class="w-full md:w-48 px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-slate-700 outline-none focus:ring-2 focus:ring-emerald-500/20 cursor-pointer">
+        <option value="">All Categories</option>
+        <option value="Food">Food</option>
+        <option value="Toys">Toys</option>
+        <option value="Accessories">Accessories</option>
+        <option value="Health">Health</option>
+      </select>
 
-        <template #body>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <Field label="Name">
-              <input
-                v-model="form.name"
-                :disabled="modal.mode==='view'"
-                class="w-full h-11 px-4 rounded-2xl border border-slate-200 bg-white text-sm font-semibold text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-300 disabled:bg-slate-50"
-                placeholder="e.g., Premium Dog Kibble"
-              />
-            </Field>
+      <select v-model="filters.stock" class="w-full md:w-48 px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-slate-700 outline-none focus:ring-2 focus:ring-emerald-500/20 cursor-pointer">
+        <option value="all">All Stock</option>
+        <option value="low">Low Stock (&lt; 10)</option>
+        <option value="out">Out of Stock</option>
+      </select>
 
-            <Field label="SKU">
-              <input
-                v-model="form.sku"
-                :disabled="modal.mode==='view'"
-                class="w-full h-11 px-4 rounded-2xl border border-slate-200 bg-white text-sm font-semibold text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-300 disabled:bg-slate-50"
-                placeholder="e.g., SKU-0001"
-              />
-            </Field>
+      <button
+        v-if="activeFiltersCount > 0"
+        @click="resetFilters"
+        class="text-xs font-bold text-red-500 hover:text-red-700 px-4 py-2"
+      >
+        Reset Filters
+      </button>
+    </div>
 
-            <Field label="Category">
-              <select
-                v-model="form.category"
-                :disabled="modal.mode==='view'"
-                class="w-full h-11 px-4 rounded-2xl border border-slate-200 bg-white text-sm font-extrabold text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-300 disabled:bg-slate-50"
+    <div v-if="isLoading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+      <div v-for="n in 8" :key="n" class="bg-white rounded-[32px] p-4 h-[400px] border border-slate-100 shadow-sm animate-pulse">
+        <div class="bg-slate-100 h-48 w-full rounded-2xl mb-4"></div>
+        <div class="h-6 bg-slate-100 rounded w-3/4 mb-2"></div>
+        <div class="h-4 bg-slate-100 rounded w-1/2"></div>
+      </div>
+    </div>
+
+    <div v-else-if="filteredProducts.length === 0" class="flex flex-col items-center justify-center py-20 text-center bg-white rounded-3xl border border-dashed border-slate-200">
+      <div class="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mb-4">
+        <svg class="w-10 h-10 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+      </div>
+      <h3 class="text-lg font-black text-slate-900">No Products Found</h3>
+      <p class="text-slate-500 text-sm mt-1">Try adjusting your filters or search query.</p>
+    </div>
+
+    <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 pb-20">
+      <AdminProductCard
+        v-for="product in filteredProducts"
+        :key="product._id"
+        :product="product"
+        @edit="openModal('edit', product)"
+        @delete="confirmDelete(product)"
+      />
+    </div>
+
+    <transition name="modal">
+      <div v-if="modal.open" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity" @click="closeModal"></div>
+
+        <div class="relative bg-white w-full max-w-2xl rounded-[32px] shadow-2xl flex flex-col max-h-[90vh] overflow-hidden">
+
+          <div class="px-8 py-6 border-b border-slate-100 flex justify-between items-center bg-white sticky top-0 z-10">
+            <div>
+              <h3 class="text-xl font-black text-slate-900">{{ modal.mode === 'create' ? 'Add New Product' : 'Edit Product' }}</h3>
+              <p class="text-xs font-bold text-slate-400 uppercase tracking-wide mt-1">Product Details</p>
+            </div>
+            <button @click="closeModal" class="p-2 bg-slate-50 rounded-full hover:bg-slate-100 transition text-slate-500">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+          </div>
+
+          <div class="p-8 overflow-y-auto custom-scrollbar space-y-6">
+
+            <div class="space-y-3">
+              <label class="block text-sm font-bold text-slate-700">Product Image</label>
+              <div
+                class="relative border-2 border-dashed border-slate-200 rounded-2xl p-8 flex flex-col items-center justify-center text-center transition-all hover:border-emerald-400 hover:bg-emerald-50/30 group cursor-pointer"
+                @click="triggerFileInput"
               >
-                <option v-for="c in categories" :key="c" :value="c">{{ c }}</option>
-              </select>
-            </Field>
+                <input type="file" ref="fileInput" class="hidden" @change="handleFileSelect" accept="image/*">
 
-            <Field label="Status">
-              <select
-                v-model="form.status"
-                :disabled="modal.mode==='view'"
-                class="w-full h-11 px-4 rounded-2xl border border-slate-200 bg-white text-sm font-extrabold text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-300 disabled:bg-slate-50"
-              >
-                <option value="Active">Active</option>
-                <option value="Inactive">Inactive</option>
-              </select>
-            </Field>
+                <div v-if="previewImage" class="relative w-40 h-40 mb-4">
+                  <img :src="previewImage" class="w-full h-full object-contain rounded-xl shadow-sm border border-slate-100 bg-white p-2">
+                  <button @click.stop="removeImage" class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 shadow hover:bg-red-600">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                  </button>
+                </div>
 
-            <Field label="Price (USD)">
-              <input
-                v-model.number="form.price"
-                :disabled="modal.mode==='view'"
-                type="number"
-                min="0"
-                step="0.01"
-                class="w-full h-11 px-4 rounded-2xl border border-slate-200 bg-white text-sm font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-300 disabled:bg-slate-50"
-              />
-            </Field>
-
-            <Field label="Cost (USD)">
-              <input
-                v-model.number="form.cost"
-                :disabled="modal.mode==='view'"
-                type="number"
-                min="0"
-                step="0.01"
-                class="w-full h-11 px-4 rounded-2xl border border-slate-200 bg-white text-sm font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-300 disabled:bg-slate-50"
-              />
-            </Field>
-
-            <Field label="Stock">
-              <input
-                v-model.number="form.stock"
-                :disabled="modal.mode==='view'"
-                type="number"
-                min="0"
-                step="1"
-                class="w-full h-11 px-4 rounded-2xl border border-slate-200 bg-white text-sm font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-300 disabled:bg-slate-50"
-              />
-            </Field>
-
-            <Field label="Total Stock">
-              <input
-                v-model.number="form.totalStock"
-                :disabled="modal.mode==='view'"
-                type="number"
-                min="0"
-                step="1"
-                class="w-full h-11 px-4 rounded-2xl border border-slate-200 bg-white text-sm font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-300 disabled:bg-slate-50"
-              />
-            </Field>
-
-            <Field label="Reorder Level">
-              <input
-                v-model.number="form.reorderLevel"
-                :disabled="modal.mode==='view'"
-                type="number"
-                min="0"
-                step="1"
-                class="w-full h-11 px-4 rounded-2xl border border-slate-200 bg-white text-sm font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-300 disabled:bg-slate-50"
-              />
-            </Field>
-
-            <Field label="Featured">
-              <div class="h-11 px-4 rounded-2xl border border-slate-200 bg-white flex items-center justify-between">
-                <span class="text-sm font-semibold text-slate-700">
-                  {{ form.featured ? 'Yes' : 'No' }}
-                </span>
-                <button
-                  v-if="modal.mode!=='view'"
-                  class="px-3 py-2 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-extrabold"
-                  @click="form.featured = !form.featured"
-                  type="button"
-                >
-                  Toggle
-                </button>
+                <div v-else class="flex flex-col items-center">
+                  <div class="w-16 h-16 bg-emerald-50 text-emerald-500 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                  </div>
+                  <p class="text-sm font-bold text-slate-900">Click to upload image</p>
+                  <p class="text-xs text-slate-400 mt-1">SVG, PNG, JPG (max. 2MB)</p>
+                </div>
               </div>
-            </Field>
+            </div>
 
-            <Field label="Image URL">
-              <input
-                v-model="form.image"
-                :disabled="modal.mode==='view'"
-                class="w-full h-11 px-4 rounded-2xl border border-slate-200 bg-white text-sm font-semibold text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-300 disabled:bg-slate-50"
-                placeholder="https://..."
-              />
-            </Field>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div class="space-y-2">
+                <label class="text-xs font-bold text-slate-500 uppercase">Product Name</label>
+                <input v-model="form.name" type="text" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-900 font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition" placeholder="e.g. Premium Dog Food">
+              </div>
+
+              <div class="space-y-2">
+                <label class="text-xs font-bold text-slate-500 uppercase">Category</label>
+                <select v-model="form.category" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-900 font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition appearance-none">
+                  <option>Food</option>
+                  <option>Toys</option>
+                  <option>Accessories</option>
+                  <option>Health</option>
+                </select>
+              </div>
+
+              <div class="space-y-2">
+                <label class="text-xs font-bold text-slate-500 uppercase">Price ($)</label>
+                <input v-model.number="form.price" type="number" step="0.01" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-900 font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition" placeholder="0.00">
+              </div>
+
+              <div class="space-y-2">
+                <label class="text-xs font-bold text-slate-500 uppercase">Stock Quantity</label>
+                <input v-model.number="form.stockQuantity" type="number" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-900 font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition" placeholder="0">
+              </div>
+            </div>
+
+            <div class="space-y-2">
+              <label class="text-xs font-bold text-slate-500 uppercase">Description</label>
+              <textarea v-model="form.description" rows="3" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-900 font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition resize-none" placeholder="Describe the product..."></textarea>
+            </div>
+
           </div>
 
-          <div v-if="modal.mode !== 'view'" class="mt-4 text-xs font-semibold">
-            <p v-if="formError" class="text-rose-700 font-extrabold">{{ formError }}</p>
-            <p v-else class="text-slate-600">
-              Tip: Low stock badge shows when <span class="font-black text-slate-900">stock ≤ reorder level</span>.
-            </p>
-          </div>
-        </template>
-
-        <template #footer>
-          <div class="flex gap-2 justify-end">
-            <button
-              class="px-4 py-2 rounded-2xl bg-white border border-slate-200 hover:bg-slate-50 text-xs font-extrabold"
-              type="button"
-              @click="closeModal"
-            >
-              Close
-            </button>
-
-            <button
-              v-if="modal.mode !== 'view'"
-              class="px-4 py-2 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-extrabold"
-              type="button"
-              @click="save"
-            >
-              Save
-            </button>
-          </div>
-        </template>
-      </Modal>
-
-      <!-- DELETE CONFIRM -->
-      <Modal v-if="deleteConfirm.open" @close="deleteConfirm.open=false">
-        <template #title>Delete Product</template>
-        <template #body>
-          <div class="text-sm text-slate-700">
-            Delete <span class="font-black text-slate-900">{{ deleteConfirm.name }}</span>? This cannot be undone.
-          </div>
-        </template>
-        <template #footer>
-          <div class="flex gap-2 justify-end">
-            <button
-              class="px-4 py-2 rounded-2xl bg-white border border-slate-200 hover:bg-slate-50 text-xs font-extrabold"
-              type="button"
-              @click="deleteConfirm.open=false"
-            >
-              Cancel
-            </button>
-            <button
-              class="px-4 py-2 rounded-2xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-extrabold"
-              type="button"
-              @click="doDelete"
-            >
-              Delete
+          <div class="p-6 border-t border-slate-100 bg-slate-50 flex justify-end gap-3">
+            <button @click="closeModal" class="px-6 py-3 rounded-xl font-bold text-slate-600 hover:bg-slate-200 transition">Cancel</button>
+            <button @click="saveProduct" :disabled="isSaving" class="px-8 py-3 rounded-xl bg-slate-900 text-white font-bold shadow-lg hover:bg-slate-800 transition disabled:opacity-70 flex items-center gap-2">
+              <span v-if="isSaving" class="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></span>
+              {{ isSaving ? 'Saving...' : 'Save Product' }}
             </button>
           </div>
-        </template>
-      </Modal>
-    </main>
+
+        </div>
+      </div>
+    </transition>
+
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { defineComponent, ref, reactive, computed, onMounted } from 'vue';
+import axios from 'axios';
+import { useAuthStore } from '@/stores/auth';
+import AdminProductCard from '@/components/Admin/AdminProductCard.vue';
+import { useToast } from 'vue-toastification';
 
-type ProductStatus = "Active" | "Inactive";
-type StockFilter = "All" | "Low" | "Out";
-type SortKey = "newest" | "name_asc" | "price_desc" | "stock_asc" | "sales_desc";
-type StatusFilter = "All" | ProductStatus;
-
-interface Product {
-  id: number;
-  name: string;
-  sku: string;
-  category: string;
-  price: number;
-  cost: number;
-  stock: number;
-  totalStock: number;
-  reorderLevel: number;
-  rating: number;
-  sales: number;
-  status: ProductStatus;
-  featured: boolean;
-  image: string;
-  createdAt: string;
-}
-
-const InfoTile = defineComponent({
-  name: "InfoTile",
-  props: {
-    label: { type: String, required: true },
-    value: { type: String, required: true },
-    hint: { type: String, required: true },
-  },
-  template: `
-    <div class="rounded-3xl border border-slate-200 bg-white/80 backdrop-blur p-4 shadow-sm">
-      <div class="text-[11px] font-black uppercase tracking-wide text-slate-500">{{ label }}</div>
-      <div class="mt-1 text-2xl font-black text-slate-900">{{ value }}</div>
-      <div class="mt-1 text-xs font-semibold text-slate-600">{{ hint }}</div>
-    </div>
-  `,
-});
-
-const Field = defineComponent({
-  name: "Field",
-  props: { label: { type: String, required: true } },
-  template: `
-    <label class="block">
-      <div class="text-[11px] font-black uppercase tracking-wide text-slate-500">{{ label }}</div>
-      <div class="mt-2"><slot/></div>
-    </label>
-  `,
-});
-
-const Modal = defineComponent({
-  name: "Modal",
-  emits: ["close"],
-  template: `
-    <div class="fixed inset-0 z-[70] flex items-center justify-center px-4">
-      <div class="absolute inset-0 bg-black/30" @click="$emit('close')"></div>
-      <div class="relative w-full max-w-2xl rounded-3xl border border-slate-200 bg-white shadow-xl">
-        <div class="p-5 border-b border-slate-200 flex items-start justify-between gap-4">
-          <div class="text-lg font-black text-slate-900"><slot name="title"/></div>
-          <button class="px-3 py-2 rounded-2xl border border-slate-200 hover:bg-slate-50 text-xs font-extrabold" @click="$emit('close')">
-            Close
-          </button>
-        </div>
-        <div class="p-5"><slot name="body"/></div>
-        <div class="p-5 border-t border-slate-200"><slot name="footer"/></div>
-      </div>
-    </div>
-  `,
-});
+const API_BASE = "https://petstore-backend-api.onrender.com/api";
 
 export default defineComponent({
   name: "Products",
-  components: { InfoTile, Field, Modal },
+  components: { AdminProductCard },
+  setup() {
+    const authStore = useAuthStore();
+    const toast = useToast();
+    const products = ref<any[]>([]);
+    const isLoading = ref(true);
+    const isSaving = ref(false);
+    const fileInput = ref<HTMLInputElement | null>(null);
+    const previewImage = ref<string | null>(null);
+    const selectedFile = ref<File | null>(null);
 
-  // ✅ FIX: receive the global navbar search text from AdminLayout
-  props: {
-    globalSearch: { type: String, default: "" },
-  },
+    const filters = reactive({
+      search: '',
+      category: '',
+      stock: 'all'
+    });
 
-  data() {
-    const categories = ["Cat Food", "Dog Food", "Accessories", "Toys", "Health"];
-    const img = (seed: number) => `https://picsum.photos/seed/admin-product-${seed}/160/160`;
+    const modal = reactive({ open: false, mode: 'create', id: '' });
 
-    const products: Product[] = Array.from({ length: 16 }).map((_, i) => ({
-      id: i + 1,
-      name: i % 4 === 0 ? "Royal Canin Kitten" : i % 4 === 1 ? "Premium Dog Kibble" : i % 4 === 2 ? "Cat Toy Wand" : "Vitamin Chews",
-      sku: `SKU-${String(i + 1).padStart(4, "0")}`,
-      category: categories[i % categories.length],
-      price: 12.5 + i * 2.35,
-      cost: 7.0 + i * 1.5,
-      stock: i % 6 === 0 ? 0 : 5 + (i * 3) % 40,
-      totalStock: 60,
-      reorderLevel: 10,
-      rating: 3.9 + ((i % 5) * 0.2),
-      sales: 40 + i * 13,
-      status: i % 7 === 0 ? "Inactive" : "Active",
-      featured: i % 8 === 0,
-      image: img(i + 1),
-      createdAt: new Date(Date.now() - i * 86400000 * 2).toISOString(),
-    }));
+    // 👇 FIXED: Using 'stockQuantity' to match Backend/DB
+    const form = reactive({
+      name: '',
+      price: 0,
+      category: 'Food',
+      stockQuantity: 0,
+      description: '',
+      brand: 'PetStore+'
+    });
+
+    const getAuthHeader = () => {
+      let token = authStore.token;
+      if (!token) {
+         const stored = localStorage.getItem('userInfo');
+         if (stored) token = JSON.parse(stored).token;
+      }
+      return { headers: { Authorization: `Bearer ${token}` } };
+    };
+
+    const fetchProducts = async () => {
+      isLoading.value = true;
+      try {
+        const { data } = await axios.get(`${API_BASE}/products`);
+        products.value = data;
+      } catch (error) {
+        console.error(error);
+      } finally {
+        isLoading.value = false;
+      }
+    };
+
+    const filteredProducts = computed(() => {
+      return products.value.filter(p => {
+        const matchesSearch = p.name.toLowerCase().includes(filters.search.toLowerCase());
+        const matchesCategory = filters.category ? p.category === filters.category : true;
+
+        // Handle variations of stock naming from DB
+        const currentStock = p.stockQuantity !== undefined ? p.stockQuantity : (p.stock || 0);
+
+        let matchesStock = true;
+        if (filters.stock === 'low') matchesStock = currentStock < 10;
+        if (filters.stock === 'out') matchesStock = currentStock === 0;
+
+        return matchesSearch && matchesCategory && matchesStock;
+      });
+    });
+
+    const activeFiltersCount = computed(() => {
+      let count = 0;
+      if (filters.search) count++;
+      if (filters.category) count++;
+      if (filters.stock !== 'all') count++;
+      return count;
+    });
+
+    const resetFilters = () => {
+      filters.search = '';
+      filters.category = '';
+      filters.stock = 'all';
+    };
+
+    const openModal = (mode: string, product: any = null) => {
+      modal.mode = mode;
+      modal.open = true;
+      if (mode === 'edit' && product) {
+        modal.id = product._id;
+        form.name = product.name;
+        form.price = product.price;
+        form.category = product.category;
+
+        // 👇 FIXED: Correctly map existing stock to form
+        form.stockQuantity = product.stockQuantity !== undefined ? product.stockQuantity : (product.stock || 0);
+
+        form.description = product.description;
+        previewImage.value = product.imageUrl || product.image;
+      } else {
+        Object.assign(form, {
+          name: '',
+          price: 0,
+          category: 'Food',
+          stockQuantity: 0, // Reset to 0 for new products
+          description: ''
+        });
+        previewImage.value = null;
+        selectedFile.value = null;
+      }
+    };
+
+    const closeModal = () => { modal.open = false; };
+
+    const triggerFileInput = () => fileInput.value?.click();
+
+    const handleFileSelect = (event: Event) => {
+      const input = event.target as HTMLInputElement;
+      if (input.files && input.files[0]) {
+        const file = input.files[0];
+        selectedFile.value = file;
+        const reader = new FileReader();
+        reader.onload = (e) => { previewImage.value = e.target?.result as string; };
+        reader.readAsDataURL(file);
+      }
+    };
+
+    const removeImage = () => {
+      selectedFile.value = null;
+      previewImage.value = null;
+      if (fileInput.value) fileInput.value.value = '';
+    };
+
+    const saveProduct = async () => {
+      isSaving.value = true;
+      try {
+        const formData = new FormData();
+        formData.append('name', form.name);
+        formData.append('price', String(form.price));
+        formData.append('category', form.category);
+
+        // 👇 FIXED: Send 'stockQuantity' to match Backend Controller
+        formData.append('stockQuantity', String(form.stockQuantity));
+
+        formData.append('description', form.description);
+        formData.append('brand', 'PetStore+');
+
+        if (selectedFile.value) {
+          formData.append('image', selectedFile.value);
+        }
+
+        const config = getAuthHeader();
+
+        if (modal.mode === 'create') {
+          await axios.post(`${API_BASE}/products`, formData, config);
+          toast.success("Product Created!");
+        } else {
+          await axios.put(`${API_BASE}/products/${modal.id}`, formData, config);
+          toast.success("Product Updated!");
+        }
+
+        closeModal();
+        fetchProducts();
+
+      } catch (error: any) {
+        console.error(error);
+        toast.error("Failed to save product. " + (error.response?.data?.message || ''));
+      } finally {
+        isSaving.value = false;
+      }
+    };
+
+    const confirmDelete = async (product: any) => {
+      if(confirm(`Are you sure you want to delete ${product.name}?`)) {
+        try {
+          await axios.delete(`${API_BASE}/products/${product._id}`, getAuthHeader());
+          toast.success("Product Deleted");
+          fetchProducts();
+        } catch(e) { toast.error("Delete Failed"); }
+      }
+    }
+
+    onMounted(fetchProducts);
 
     return {
-      products,
-      categories,
-
-      // filters
-      q: "" as string,
-      category: "All" as string,
-      stockFilter: "All" as StockFilter,
-      statusFilter: "All" as StatusFilter,
-      sortBy: "newest" as SortKey,
-
-      // paging
-      page: 1,
-      pageSize: 8,
-
-      // selection
-      selectedIds: [] as number[],
-
-      // ui
-      toast: "" as string,
-      formError: "" as string,
-
-      modal: {
-        open: false,
-        mode: "create" as "create" | "edit" | "view",
-        activeId: null as number | null,
-      },
-
-      form: {
-        name: "",
-        sku: "",
-        category: categories[0],
-        price: 0,
-        cost: 0,
-        stock: 0,
-        totalStock: 60,
-        reorderLevel: 10,
-        status: "Active" as ProductStatus,
-        featured: false,
-        image: "https://picsum.photos/seed/new-admin-product/160/160",
-      },
-
-      deleteConfirm: {
-        open: false,
-        id: null as number | null,
-        name: "",
-      },
+      products, isLoading, isSaving, modal, form, filters, filteredProducts, activeFiltersCount,
+      openModal, closeModal, saveProduct, confirmDelete, resetFilters,
+      fileInput, triggerFileInput, handleFileSelect, previewImage, removeImage
     };
-  },
-
-  computed: {
-    lowStockCount(): number {
-      return this.products.filter((p) => p.stock > 0 && p.stock <= p.reorderLevel).length;
-    },
-    outOfStockCount(): number {
-      return this.products.filter((p) => p.stock === 0).length;
-    },
-    featuredCount(): number {
-      return this.products.filter((p) => p.featured).length;
-    },
-
-    filtered(): Product[] {
-      const q = this.q.trim().toLowerCase();
-
-      let list = this.products.filter((p) => {
-        const hit =
-          !q ||
-          p.name.toLowerCase().includes(q) ||
-          p.sku.toLowerCase().includes(q) ||
-          p.category.toLowerCase().includes(q);
-
-        const catOk = this.category === "All" || p.category === this.category;
-
-        const stockOk =
-          this.stockFilter === "All" ||
-          (this.stockFilter === "Out" && p.stock === 0) ||
-          (this.stockFilter === "Low" && p.stock > 0 && p.stock <= p.reorderLevel);
-
-        const statusOk = this.statusFilter === "All" || p.status === this.statusFilter;
-
-        return hit && catOk && stockOk && statusOk;
-      });
-
-      if (this.sortBy === "newest") list = list.slice().sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
-      if (this.sortBy === "name_asc") list = list.slice().sort((a, b) => a.name.localeCompare(b.name));
-      if (this.sortBy === "price_desc") list = list.slice().sort((a, b) => b.price - a.price);
-      if (this.sortBy === "stock_asc") list = list.slice().sort((a, b) => a.stock - b.stock);
-      if (this.sortBy === "sales_desc") list = list.slice().sort((a, b) => b.sales - a.sales);
-
-      return list;
-    },
-
-    totalPages(): number {
-      return Math.max(1, Math.ceil(this.filtered.length / this.pageSize));
-    },
-
-    visible(): Product[] {
-      const start = (this.page - 1) * this.pageSize;
-      return this.filtered.slice(start, start + this.pageSize);
-    },
-
-    allChecked(): boolean {
-      if (this.visible.length === 0) return false;
-      return this.visible.every((p) => this.selectedIds.includes(p.id));
-    },
-  },
-
-  watch: {
-    // ✅ FIX: update local search when navbar search changes
-    globalSearch(newVal: string) {
-      this.q = (newVal || "").toString();
-    },
-
-    q() { this.page = 1; },
-    category() { this.page = 1; },
-    stockFilter() { this.page = 1; },
-    statusFilter() { this.page = 1; },
-    sortBy() { this.page = 1; },
-    filtered() { this.page = Math.min(this.page, this.totalPages); },
-  },
-
-  methods: {
-    toastMsg(msg: string) {
-      this.toast = msg;
-      window.clearTimeout((this as any)._t);
-      (this as any)._t = window.setTimeout(() => (this.toast = ""), 1400);
-    },
-
-    stockPct(p: Product): number {
-      const denom = Math.max(1, p.totalStock);
-      return Math.max(0, Math.min(100, Math.round((p.stock / denom) * 100)));
-    },
-    stockLabel(p: Product): string {
-      if (p.stock === 0) return "Out";
-      if (p.stock <= p.reorderLevel) return "Low";
-      return "OK";
-    },
-    stockBadge(p: Product): string {
-      if (p.stock === 0) return "bg-rose-50 text-rose-800 border-rose-200";
-      if (p.stock <= p.reorderLevel) return "bg-amber-50 text-amber-800 border-amber-200";
-      return "bg-emerald-50 text-emerald-800 border-emerald-200";
-    },
-
-    adjustStock(id: number, delta: number) {
-      this.products = this.products.map((p) =>
-        p.id === id ? { ...p, stock: Math.max(0, p.stock + delta) } : p
-      );
-      this.toastMsg("Stock updated ✅");
-    },
-
-    toggleFeatured(id: number) {
-      this.products = this.products.map((p) => (p.id === id ? { ...p, featured: !p.featured } : p));
-      this.toastMsg("Updated featured ✅");
-    },
-
-    toggleOne(id: number, e: Event) {
-      const checked = (e.target as HTMLInputElement).checked;
-      if (checked) {
-        if (!this.selectedIds.includes(id)) this.selectedIds.push(id);
-      } else {
-        this.selectedIds = this.selectedIds.filter((x) => x !== id);
-      }
-    },
-
-    toggleAll(e: Event) {
-      const checked = (e.target as HTMLInputElement).checked;
-      const ids = this.visible.map((p) => p.id);
-      if (checked) this.selectedIds = Array.from(new Set([...this.selectedIds, ...ids]));
-      else this.selectedIds = this.selectedIds.filter((id) => !ids.includes(id));
-    },
-
-    bulkRestock() {
-      if (this.selectedIds.length === 0) return;
-      this.products = this.products.map((p) =>
-        this.selectedIds.includes(p.id)
-          ? { ...p, stock: p.stock + 10, totalStock: Math.max(p.totalStock, p.stock + 10) }
-          : p
-      );
-      this.toastMsg("Restocked selected ✅");
-    },
-
-    bulkDelete() {
-      if (this.selectedIds.length === 0) return;
-      const n = this.selectedIds.length;
-      this.products = this.products.filter((p) => !this.selectedIds.includes(p.id));
-      this.selectedIds = [];
-      this.toastMsg(`Deleted ${n} product(s) ✅`);
-    },
-
-    openCreate() {
-      this.formError = "";
-      this.modal.open = true;
-      this.modal.mode = "create";
-      this.modal.activeId = null;
-      this.form = {
-        name: "",
-        sku: "",
-        category: this.categories[0],
-        price: 0,
-        cost: 0,
-        stock: 0,
-        totalStock: 60,
-        reorderLevel: 10,
-        status: "Active",
-        featured: false,
-        image: "https://picsum.photos/seed/new-admin-product/160/160",
-      };
-    },
-
-    openEdit(p: Product) {
-      this.formError = "";
-      this.modal.open = true;
-      this.modal.mode = "edit";
-      this.modal.activeId = p.id;
-      this.form = {
-        name: p.name,
-        sku: p.sku,
-        category: p.category,
-        price: p.price,
-        cost: p.cost,
-        stock: p.stock,
-        totalStock: p.totalStock,
-        reorderLevel: p.reorderLevel,
-        status: p.status,
-        featured: p.featured,
-        image: p.image,
-      };
-    },
-
-    openView(p: Product) {
-      this.formError = "";
-      this.modal.open = true;
-      this.modal.mode = "view";
-      this.modal.activeId = p.id;
-      this.form = {
-        name: p.name,
-        sku: p.sku,
-        category: p.category,
-        price: p.price,
-        cost: p.cost,
-        stock: p.stock,
-        totalStock: p.totalStock,
-        reorderLevel: p.reorderLevel,
-        status: p.status,
-        featured: p.featured,
-        image: p.image,
-      };
-    },
-
-    closeModal() {
-      this.modal.open = false;
-    },
-
-    validate(): string {
-      const name = this.form.name.trim();
-      const sku = this.form.sku.trim().toUpperCase();
-      if (!name) return "Name is required.";
-      if (!sku) return "SKU is required.";
-
-      const exists = this.products.some((p) => p.sku.toUpperCase() === sku && p.id !== this.modal.activeId);
-      if (exists) return "SKU must be unique.";
-
-      if ((Number(this.form.price) || 0) < 0) return "Price cannot be negative.";
-      if ((Number(this.form.cost) || 0) < 0) return "Cost cannot be negative.";
-      if ((Number(this.form.price) || 0) < (Number(this.form.cost) || 0)) return "Price should not be lower than cost.";
-
-      return "";
-    },
-
-    save() {
-      const err = this.validate();
-      this.formError = err;
-      if (err) return;
-
-      const sku = this.form.sku.trim().toUpperCase();
-
-      if (this.modal.mode === "create") {
-        const nextId = Math.max(0, ...this.products.map((p) => p.id)) + 1;
-        this.products.unshift({
-          id: nextId,
-          name: this.form.name.trim(),
-          sku,
-          category: this.form.category,
-          price: Number(this.form.price) || 0,
-          cost: Number(this.form.cost) || 0,
-          stock: Math.max(0, Number(this.form.stock) || 0),
-          totalStock: Math.max(0, Number(this.form.totalStock) || 0),
-          reorderLevel: Math.max(0, Number(this.form.reorderLevel) || 0),
-          rating: 4.2,
-          sales: 0,
-          status: this.form.status,
-          featured: this.form.featured,
-          image: this.form.image || "https://picsum.photos/seed/fallback-admin-product/160/160",
-          createdAt: new Date().toISOString(),
-        });
-        this.toastMsg("Product created ✅");
-      }
-
-      if (this.modal.mode === "edit" && this.modal.activeId != null) {
-        const id = this.modal.activeId;
-        this.products = this.products.map((p) =>
-          p.id === id
-            ? {
-                ...p,
-                name: this.form.name.trim(),
-                sku,
-                category: this.form.category,
-                price: Number(this.form.price) || 0,
-                cost: Number(this.form.cost) || 0,
-                stock: Math.max(0, Number(this.form.stock) || 0),
-                totalStock: Math.max(0, Number(this.form.totalStock) || 0),
-                reorderLevel: Math.max(0, Number(this.form.reorderLevel) || 0),
-                status: this.form.status,
-                featured: this.form.featured,
-                image: this.form.image || p.image,
-              }
-            : p
-        );
-        this.toastMsg("Product updated ✅");
-      }
-
-      this.modal.open = false;
-    },
-
-    confirmDelete(p: Product) {
-      this.deleteConfirm.open = true;
-      this.deleteConfirm.id = p.id;
-      this.deleteConfirm.name = p.name;
-    },
-
-    doDelete() {
-      const id = this.deleteConfirm.id;
-      if (id == null) return;
-      this.products = this.products.filter((p) => p.id !== id);
-      this.selectedIds = this.selectedIds.filter((x) => x !== id);
-      this.deleteConfirm.open = false;
-      this.toastMsg("Product deleted ✅");
-    },
-
-    exportCsv() {
-      const rows = this.filtered.map((p) => ({
-        id: p.id,
-        name: p.name,
-        sku: p.sku,
-        category: p.category,
-        price: p.price,
-        cost: p.cost,
-        stock: p.stock,
-        totalStock: p.totalStock,
-        reorderLevel: p.reorderLevel,
-        sales: p.sales,
-        status: p.status,
-        featured: p.featured ? "Yes" : "No",
-      }));
-
-      if (rows.length === 0) {
-        this.toastMsg("Nothing to export.");
-        return;
-      }
-
-      const header = Object.keys(rows[0]).join(",");
-      const body = rows
-        .map((r) => Object.values(r).map((v) => `"${String(v).replaceAll('"', '""')}"`).join(","))
-        .join("\n");
-
-      const csv = header + "\n" + body;
-      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "products_report.csv";
-      a.click();
-      URL.revokeObjectURL(url);
-
-      this.toastMsg("CSV exported ✅");
-    },
-  },
+  }
 });
 </script>
+
+<style scoped>
+.modal-enter-active, .modal-leave-active { transition: opacity 0.2s ease; }
+.modal-enter-from, .modal-leave-to { opacity: 0; }
+.custom-scrollbar::-webkit-scrollbar { width: 6px; }
+.custom-scrollbar::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 20px; }
+</style>

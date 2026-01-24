@@ -1,84 +1,50 @@
 <template>
-  <div class="relative w-[280px] h-[368px] bg-white border-2 border-green-500 rounded-2xl p-4 flex flex-col justify-between shadow-sm font-sans transition-all hover:shadow-md">
-    
-    <div v-if="loading" class="flex flex-col items-center justify-center h-full space-y-4 animate-pulse">
-      <div class="w-32 h-32 bg-gray-200 rounded-full"></div>
-      <div class="h-4 bg-gray-200 rounded w-3/4"></div>
-      <div class="h-4 bg-gray-200 rounded w-1/2"></div>
-    </div>
+  <div class="group relative bg-white rounded-[24px] border border-slate-100 p-5 flex flex-col transition-all duration-300 hover:shadow-xl hover:border-slate-200 hover:-translate-y-1">
 
-    <div v-else-if="error" class="flex items-center justify-center h-full text-red-500 text-center text-sm font-medium">
-      {{ error }}
-    </div>
-
-    <div v-else class="contents">
-      <button class="absolute top-3 right-3 text-gray-300 hover:text-gray-500 transition">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-          <circle cx="5" cy="12" r="2"></circle>
-          <circle cx="12" cy="12" r="2"></circle>
-          <circle cx="19" cy="12" r="2"></circle>
-        </svg>
+    <div class="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10">
+      <button @click.stop="$emit('edit', product)" class="p-2 bg-white rounded-full shadow-md text-slate-500 hover:text-blue-600 hover:bg-blue-50 transition">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
       </button>
+      <button @click.stop="$emit('delete', product)" class="p-2 bg-white rounded-full shadow-md text-slate-500 hover:text-red-600 hover:bg-red-50 transition">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+      </button>
+    </div>
 
-      <div class="h-40 flex items-center justify-center mt-2">
-        <img 
-          :src="product?.image" 
-          :alt="product?.title" 
-          class="h-full object-contain drop-shadow-sm"
-        />
+    <div class="relative h-48 w-full bg-[#F8FAFC] rounded-2xl mb-4 overflow-hidden flex items-center justify-center p-4 group-hover:bg-[#F1F5F9] transition-colors">
+      <img
+        :src="resolvedImage"
+        :alt="product.name"
+        class="h-full w-full object-contain mix-blend-multiply transition-transform duration-500 group-hover:scale-110"
+      />
+      <div v-if="(product.stockQuantity || product.stock || 0) < 5" class="absolute bottom-3 left-3 bg-red-500/90 backdrop-blur-sm text-white text-[10px] font-bold px-2 py-1 rounded-lg shadow-sm">
+        Low Stock
       </div>
+    </div>
 
-      <div class="flex flex-col gap-1">
-        <div class="flex text-orange-400">
-          <svg 
-            v-for="i in 5" 
-            :key="i"
-            xmlns="http://www.w3.org/2000/svg" 
-            viewBox="0 0 24 24" 
-            fill="currentColor"
-            class="w-5 h-5 transition-colors duration-300"
-            :class="i <= (product?.rating || 0) ? 'text-orange-400' : 'text-gray-200'"
-          >
-            <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+    <div class="flex-1 flex flex-col">
+      <div class="flex justify-between items-start mb-1">
+        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">{{ product.category }}</span>
+        <div class="flex text-amber-400">
+          <svg v-for="i in 5" :key="i" class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
           </svg>
         </div>
-
-        <h2 class="text-xl font-extrabold text-black leading-tight truncate">
-          {{ product?.title }}
-        </h2>
-        
-        <p class="text-gray-400 text-sm font-medium">Description</p>
-
-        <p class="text-green-600 text-2xl font-bold mt-1">
-          ${{ formatPrice(product?.price) }}
-        </p>
       </div>
 
-      <div class="border border-gray-200 rounded-lg p-2.5 mt-auto text-sm w-full">
-        <div class="flex justify-between items-center mb-2">
-          <span class="text-black font-medium">sales:</span>
-          <div class="flex items-center gap-1">
-            <svg class="text-green-600 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 10l7-7m0 0l7 7m-7-7v18"></path>
-            </svg>
-            <span class="font-medium text-black">{{ product?.sales }}</span>
-          </div>
-        </div>
+      <h3 class="text-base font-bold text-slate-900 leading-tight mb-auto line-clamp-2">
+        {{ product.name }}
+      </h3>
 
-        <div class="flex flex-col gap-1">
-          <div class="flex justify-between items-center w-full">
-            <span class="text-black text-xs sm:text-sm whitespace-nowrap">Remaining Products:</span>
-            <span class="text-xs font-medium text-gray-600">
-              {{ product?.remaining }}
-            </span>
-          </div>
-          
-          <div class="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
-            <div 
-              class="bg-green-600 h-2 rounded-full transition-all duration-1000 ease-out" 
-              :style="{ width: stockPercentage + '%' }"
-            ></div>
-          </div>
+      <div class="mt-4 flex items-end justify-between border-t border-slate-50 pt-3">
+        <div>
+          <p class="text-xs font-semibold text-slate-400">Price</p>
+          <p class="text-xl font-black text-slate-900">${{ formatPrice(product.price) }}</p>
+        </div>
+        <div class="text-right">
+          <p class="text-xs font-semibold text-slate-400">Stock</p>
+          <p class="text-sm font-bold" :class="(product.stockQuantity || 0) > 0 ? 'text-emerald-600' : 'text-red-500'">
+            {{ product.stockQuantity || 0 }} units
+          </p>
         </div>
       </div>
     </div>
@@ -86,98 +52,36 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, computed } from 'vue';
 
-// 1. Define Types (Student/Professional Best Practice)
-// This ensures we know exactly what data shape we are dealing with.
-interface Product {
-  id: number;
-  title: string;
-  image: string;
-  price: number;
-  rating: number;     // 1 to 5
-  sales: number;
-  remaining: number;
-  totalStock: number; // needed for progress bar calculation
-}
+// 👇 Define your backend URL constant
+const BACKEND_URL = "https://petstore-backend-api.onrender.com";
 
 export default defineComponent({
   name: 'AdminProductCard',
-  
-  // 2. Props: Allows the parent to request a specific product ID
   props: {
-    productId: {
-      type: Number,
-      required: true,
-      default: 1
+    product: {
+      type: Object,
+      required: true
     }
   },
+  emits: ['edit', 'delete'],
+  setup(props) {
+    // 👇 Computed property to fix image URLs
+    const resolvedImage = computed(() => {
+      const path = props.product.imageUrl || props.product.image;
+      if (!path) return 'https://via.placeholder.com/150';
+      // If it starts with http, it's already a full URL (external image)
+      if (path.startsWith('http')) return path;
+      // Otherwise, prepend the backend URL
+      return `${BACKEND_URL}${path}`;
+    });
 
-  // 3. Data: Reactive state for the component
-  data() {
-    return {
-      product: null as Product | null,
-      loading: true,
-      error: null as string | null,
+    const formatPrice = (price: number) => {
+      return Number(price).toFixed(2);
     };
-  },
 
-  // 4. Computed Properties: For derived logic (cleaner templates)
-  computed: {
-    stockPercentage(): number {
-      if (!this.product) return 0;
-      // Prevent division by zero and cap at 100%
-      if (this.product.totalStock === 0) return 0;
-      return (this.product.remaining / this.product.totalStock) * 100;
-    }
-  },
-
-  // 5. Lifecycle Hook: Fetch data when component mounts
-  mounted() {
-    this.fetchProductData();
-  },
-
-  // 6. Methods: Actions the component can take
-  methods: {
-    async fetchProductData() {
-      this.loading = true;
-      this.error = null;
-
-      try {
-        // --- SIMULATING BACKEND CALL ---
-        // In a real project, this would be: 
-        // const res = await axios.get(`/api/products/${this.productId}`);
-        
-        await new Promise(resolve => setTimeout(resolve, 800)); // Fake network delay
-        
-        // Mock Response
-        const mockData: Product = {
-          id: this.productId,
-          title: "Cat Food",
-          // Using a reliable placeholder image
-          image: "https://www.royalcanin.com/kr/cats/products/retail-products/sensible-33-dry/-/media/c7091176518742878516087796071424.jpg?rev=f43c323f495544499d369e880228e946", 
-          price: 29.99,
-          rating: 4,
-          sales: 120,
-          remaining: 12,
-          totalStock: 50
-        };
-        
-        this.product = mockData;
-        // -------------------------------
-        
-      } catch (err) {
-        console.error(err);
-        this.error = "Failed to load product data.";
-      } finally {
-        this.loading = false;
-      }
-    },
-
-    formatPrice(price: number | undefined): string {
-      if (price === undefined) return '0.00';
-      return price.toFixed(2);
-    }
+    return { resolvedImage, formatPrice };
   }
 });
 </script>

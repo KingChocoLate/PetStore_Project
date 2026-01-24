@@ -1,155 +1,103 @@
 <template>
-  <header class="w-full h-[72px] bg-white border-b border-slate-200 flex items-center justify-between px-6">
-    <!-- LEFT -->
-    <div class="min-w-0">
-      <p class="text-[11px] font-semibold tracking-wide uppercase text-slate-400">
-        Admin
-      </p>
-      <h1 class="font-poppins-semiBold text-[20px] text-slate-900 truncate">
-        {{ title }}
-      </h1>
+  <header class="w-full h-20 flex items-center justify-between px-6 lg:px-10 bg-[#F8FAFC] sticky top-0 z-30">
+
+    <div>
+      <h1 class="text-2xl font-black text-slate-900 tracking-tight">{{ title }}</h1>
     </div>
 
-    <!-- RIGHT -->
-    <div class="flex items-center gap-3">
-      <!-- Search box -->
-      <div class="hidden md:flex items-center gap-2 h-10 rounded-xl bg-slate-50 border border-slate-200 px-3 w-[260px]">
-        <img src="../../assets/search.svg" alt="Search" class="w-4 h-4 opacity-70" />
+    <div class="flex items-center gap-4">
+
+      <div class="hidden md:flex items-center bg-white border border-slate-200 rounded-2xl px-4 py-2.5 shadow-sm focus-within:ring-2 focus-within:ring-emerald-500/20 transition-all w-64">
+        <svg class="w-4 h-4 text-slate-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
         <input
           v-model="query"
           type="text"
-          placeholder="Search orders, products..."
-          class="w-full bg-transparent outline-none text-sm text-slate-700 placeholder:text-slate-400"
-        />
+          placeholder="Search..."
+          class="bg-transparent border-none outline-none text-sm font-semibold text-slate-700 placeholder-slate-400 w-full"
+        >
       </div>
 
-      <!-- Search icon (mobile) -->
-      <button
-        type="button"
-        class="md:hidden h-10 w-10 rounded-xl bg-slate-50 border border-slate-200 hover:bg-slate-100 transition flex items-center justify-center"
-        aria-label="Search"
-        title="Search"
-      >
-        <img src="../../assets/search.svg" alt="Search" class="w-5 h-5" />
+      <button class="relative w-10 h-10 bg-white border border-slate-200 rounded-xl flex items-center justify-center text-slate-600 hover:text-emerald-600 hover:border-emerald-200 transition shadow-sm">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
+        <span class="absolute top-2 right-2.5 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
       </button>
 
-      <!-- Notifications -->
-      <button
-        type="button"
-        class="relative h-10 w-10 rounded-xl bg-slate-50 border border-slate-200 hover:bg-slate-100 transition flex items-center justify-center"
-        aria-label="Notifications"
-        title="Notifications"
-      >
-        <img src="../../assets/Admin_icons/NavBar/notifications.svg" alt="Notifications" class="w-5 h-5" />
-
-        <!-- RED badge -->
-        <span
-          class="absolute -top-1 -right-1 h-5 min-w-[20px] px-1 rounded-full bg-red-500 border border-white text-[11px] font-bold text-white flex items-center justify-center"
-        >
-          3
-        </span>
-      </button>
-
-      <!-- Profile dropdown -->
       <div class="relative">
-        <button
-          type="button"
-          @click="toggleMenu"
-          class="h-10 rounded-xl bg-slate-50 border border-slate-200 hover:bg-slate-100 transition flex items-center gap-3 px-3"
-          aria-label="User menu"
-        >
-          <div class="h-8 w-8 rounded-xl bg-[#CBDAAF] flex items-center justify-center font-bold text-slate-900">
-            {{ initials }}
+        <button @click="toggleMenu" class="flex items-center gap-3 pl-2 pr-1 py-1 rounded-2xl hover:bg-white transition cursor-pointer">
+          <div class="text-right hidden sm:block">
+            <p class="text-sm font-bold text-slate-900 leading-tight">{{ name }}</p>
+            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Admin</p>
           </div>
-
-          <div class="hidden sm:block text-left leading-tight">
-            <p class="font-poppins-medium text-[13px] text-slate-900 truncate max-w-[130px]">
-              {{ name }}
-            </p>
-            <p class="font-poppins-regular text-[11px] text-slate-500">Admin</p>
+          <div class="w-10 h-10 rounded-full bg-[#CBDAAF] border-2 border-white shadow-sm flex items-center justify-center text-slate-800 font-bold text-sm">
+            {{ initials }}
           </div>
         </button>
 
-        <!-- Menu -->
-        <div
-          v-if="menuOpen"
-          class="absolute right-0 mt-2 w-[220px] rounded-2xl bg-white border border-slate-200 shadow-lg overflow-hidden z-50"
-        >
-          <div class="px-4 py-3 border-b border-slate-200">
-            <p class="text-sm font-semibold text-slate-900 truncate">{{ name }}</p>
-            <p class="text-xs text-slate-500">Admin</p>
+        <transition name="fade">
+          <div v-if="menuOpen" class="absolute right-0 mt-3 w-48 bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden z-50">
+            <div class="p-2 space-y-1">
+              <button class="w-full text-left px-4 py-2 text-sm font-bold text-slate-600 hover:bg-slate-50 hover:text-slate-900 rounded-xl transition">Profile</button>
+              <button class="w-full text-left px-4 py-2 text-sm font-bold text-slate-600 hover:bg-slate-50 hover:text-slate-900 rounded-xl transition">Settings</button>
+            </div>
+            <div class="h-px bg-slate-50 my-1"></div>
+            <div class="p-2">
+              <button @click="handleLogout" class="w-full text-left px-4 py-2 text-sm font-bold text-red-600 hover:bg-red-50 rounded-xl transition">Logout</button>
+            </div>
           </div>
-
-          <button
-            type="button"
-            class="w-full px-4 py-3 text-left text-sm text-slate-700 hover:bg-slate-50 transition"
-          >
-            Profile
-          </button>
-
-          <button
-            type="button"
-            class="w-full px-4 py-3 text-left text-sm text-slate-700 hover:bg-slate-50 transition"
-          >
-            Settings
-          </button>
-
-          <div class="border-t border-slate-200">
-            <button
-              type="button"
-              class="w-full px-4 py-3 text-left text-sm font-semibold text-red-600 hover:bg-red-50 transition"
-            >
-              Logout
-            </button>
-          </div>
-        </div>
+        </transition>
       </div>
+
     </div>
   </header>
 </template>
 
 <script lang="ts">
-export default {
+import { defineComponent, ref, computed, onMounted, onUnmounted } from 'vue';
+import { useAuthStore } from '@/stores/auth';
+import { useRouter } from 'vue-router';
+
+export default defineComponent({
   name: "AdminNavigation",
   props: {
     title: { type: String, required: true },
     name: { type: String, required: true },
   },
-
   emits: ["search-change"],
-  
-  data() {
-    return {
-      query: "",
-      menuOpen: false,
-    };
-  },
+  setup(props, { emit }) {
+    const authStore = useAuthStore();
+    const router = useRouter();
+    const query = ref("");
+    const menuOpen = ref(false);
 
-  watch: {
-    query(newVal: string) {
-      this.$emit("search-change", newVal);
-    },
-  },
-
-  computed: {
-    initials(): string {
-      const parts = (this.name || "Admin").trim().split(/\s+/);
-      const first = parts[0]?.[0] || "A";
-      const last = parts.length > 1 ? parts[parts.length - 1][0] : "";
-      return (first + last).toUpperCase();
-    },
-  },
-  methods: {
-    toggleMenu() {
-      this.menuOpen = !this.menuOpen;
-    },
-  },
-  mounted() {
-    // close dropdown on outside click
-    document.addEventListener("click", (e: any) => {
-      const root = this.$el as HTMLElement;
-      if (!root.contains(e.target)) this.menuOpen = false;
+    const initials = computed(() => {
+      const parts = (props.name || "A").split(" ");
+      return parts[0][0] + (parts.length > 1 ? parts[1][0] : "");
     });
+
+    const toggleMenu = () => { menuOpen.value = !menuOpen.value; };
+
+    const handleLogout = () => {
+      authStore.logout();
+      localStorage.removeItem('userToken');
+      localStorage.removeItem('userInfo');
+      router.push('/login');
+    };
+
+    // Close on click outside
+    const closeMenu = (e: MouseEvent) => {
+      // Logic would go here if using a real click-outside directive
+      // For simplicity, we just toggle for now
+    };
+
+    return { query, menuOpen, initials, toggleMenu, handleLogout };
   },
-};
+  watch: {
+    query(val) { this.$emit("search-change", val); }
+  }
+});
 </script>
+
+<style scoped>
+.fade-enter-active, .fade-leave-active { transition: opacity 0.2s ease, transform 0.2s ease; }
+.fade-enter-from, .fade-leave-to { opacity: 0; transform: translateY(-10px); }
+</style>

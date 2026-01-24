@@ -155,6 +155,9 @@ import { useAuthStore } from '@/stores/auth';
 import api from '@/services/api';
 import { useToast } from "vue-toastification";
 
+// 👇 Define your backend URL constant
+const BACKEND_URL = "https://petstore-backend-api.onrender.com";
+
 export default defineComponent({
   name: 'ProductDetail',
   setup() {
@@ -174,13 +177,24 @@ export default defineComponent({
     const rating = ref('5');
     const comment = ref('');
 
+    // 👇 Helper to fix image paths
+    const getImageUrl = (path: string) => {
+      if (!path) return 'https://via.placeholder.com/300';
+      // If it starts with http, it's already a full URL (external image)
+      if (path.startsWith('http') || path.startsWith('blob:')) return path;
+      // Otherwise, prepend the backend URL
+      return `${BACKEND_URL}${path}`;
+    };
+
     const fetchProduct = async () => {
       loading.value = true;
       try {
         const response = await api.get(`/products/${route.params.id}`);
         product.value = response.data;
         if (product.value) {
-            mainImage.value = product.value.imageUrl || product.value.image || '';
+            // 👇 Use the helper immediately so 'mainImage' is always a valid URL
+            const rawPath = product.value.imageUrl || product.value.image || '';
+            mainImage.value = getImageUrl(rawPath);
         }
       } catch (err) {
         console.error(err);
@@ -217,7 +231,7 @@ export default defineComponent({
           name: product.value.name,
           price: product.value.price,
           category: product.value.category,
-          image: mainImage.value
+          image: mainImage.value // 👇 Passes the full URL to the cart!
         });
       }
       toast.success("Added to Cart!");
