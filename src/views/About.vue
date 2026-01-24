@@ -162,7 +162,7 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import heroImage from '../assets/photos/Pets2.png';
+import heroImage from '../assets/images/about_page_img.png';
 import storyImage from '../assets/photos/shop.png';
 
 export default defineComponent({

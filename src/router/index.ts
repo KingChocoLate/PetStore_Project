@@ -15,7 +15,7 @@ import Checkout from '@/views/Checkout.vue'
 import OrderHistory from '@/views/OrderHistory.vue'
 import UserProfile from '@/views/UserProfile.vue'
 import ForgotPassword from '@/views/ForgotPassword.vue'
-import ResetPassword from '../views/ResetPassword.vue';
+import ResetPassword from '../views/ResetPassword.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -23,14 +23,20 @@ const router = createRouter({
     // 1. Root Redirect
     {
       path: '/',
-      redirect: '/home'
+      redirect: '/home',
     },
 
-    // 2. Auth Pages
-    { path: '/register', name: 'register', component: Register },
-    { path: '/login', name: 'login', component: Login },
-    { path: '/forgot-password', name: 'forgot-password', component: ForgotPassword },
-    { path: '/reset-password', name: 'reset-password', component: ResetPassword },
+    // 2. Auth Pages with AuthLayout
+    {
+      path: '/',
+      component: () => import('@/layouts/AuthLayout.vue'),
+      children: [
+        { path: 'register', name: 'register', component: Register },
+        { path: 'login', name: 'login', component: Login },
+        { path: 'forgot-password', name: 'forgot-password', component: ForgotPassword },
+        { path: 'reset-password', name: 'reset-password', component: ResetPassword },
+      ],
+    },
 
     // 3. Main Application Routes (Customer)
     {
@@ -67,7 +73,7 @@ const router = createRouter({
         {
           path: 'products',
           name: 'admin-products',
-          component: () => import('@/views/Admin/Products.vue')
+          component: () => import('@/views/Admin/Products.vue'),
         },
         {
           path: 'orders',
@@ -77,14 +83,14 @@ const router = createRouter({
         {
           path: 'customers',
           name: 'admin-customers',
-          component: () => import('@/views/Admin/Customers.vue')
+          component: () => import('@/views/Admin/Customers.vue'),
         },
         {
           path: 'promotions',
           name: 'admin-promotions',
-          component: () => import('@/views/Admin/Promotions.vue')
-        }
-      ]
+          component: () => import('@/views/Admin/Promotions.vue'),
+        },
+      ],
     },
 
     // Catch-all for 404

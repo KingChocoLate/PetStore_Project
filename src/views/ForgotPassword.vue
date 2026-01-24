@@ -1,46 +1,108 @@
 <template>
-  <div class="forgot-container">
-
+  <div
+    class="min-h-auto w-full flex items-center justify-center bg-white px-4 py-10 sm:px-6 lg:px-8"
+  >
     <transition name="fade">
-      <div v-if="notification.visible" :class="['toast-notification', notification.type]">
-        <span class="toast-icon">
-          <svg v-if="notification.type === 'success'" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
-          <svg v-else width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+      <div
+        v-if="notification.visible"
+        :class="[
+          'fixed top-5 left-1/2 -translate-x-1/2 bg-white px-5 py-3 rounded-full shadow-lg flex items-center gap-3 z-50 font-semibold border-l-4',
+          notification.type === 'success'
+            ? 'border-green-600 text-green-700'
+            : 'border-red-600 text-red-700',
+        ]"
+      >
+        <span class="flex items-center">
+          <svg
+            v-if="notification.type === 'success'"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+          </svg>
+          <svg
+            v-else
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="12"></line>
+            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+          </svg>
         </span>
-        <span class="toast-message">{{ notification.message }}</span>
+        <span>{{ notification.message }}</span>
       </div>
     </transition>
 
-    <div class="card-wrapper">
-
-      <div class="theme-banner">
-        <div class="slogan-content">
-          <img :src="sloganImage" alt="Where Pets Are Family" class="slogan-img" />
-
-          <div class="visual-elements">
-            <img :src="birdhouseImage" alt="Birdhouse" class="birdhouse-img" />
-            <img :src="pawsImage" alt="Paws" class="paws-img" />
-            <img :src="petsImage" alt="Pets" class="pets-img" />
-          </div>
-        </div>
-      </div>
-
-      <div class="form-area">
-        <router-link to="/login" class="close-icon" aria-label="Back to Login">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+    <div
+      class="relative w-full max-w-md sm:max-w-lg shadow-[0_10px_40px_rgba(0,0,0,0.1)] rounded-[24px] overflow-hidden bg-white"
+    >
+      <div
+        class="relative flex flex-col justify-center items-center w-full px-6 sm:px-10 lg:px-12 py-10 bg-white"
+      >
+        <router-link
+          to="/login"
+          class="absolute top-6 left-6 text-gray-400 hover:text-black"
+          aria-label="Back to Login"
+        >
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <line x1="19" y1="12" x2="5" y2="12"></line>
+            <polyline points="12 19 5 12 12 5"></polyline>
+          </svg>
         </router-link>
 
-        <div class="form-content">
-          <h2>Reset Password</h2>
-          <p class="subtitle">Enter your email and we'll send you a link to reset your password.</p>
+        <div class="w-full max-w-[420px]">
+          <h2 class="text-2xl font-bold mb-3 text-center text-black">Reset Password</h2>
+          <p class="text-center text-gray-500 text-sm mb-7 leading-relaxed">
+            Enter your email and we'll send you a link to reset your password.
+          </p>
 
           <form @submit.prevent="handleReset">
-
-            <div class="input-group">
-              <label for="email">Email Address</label>
-              <div class="input-wrapper">
-                <span class="input-icon">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+            <div class="mb-6">
+              <label for="email" class="block font-bold mb-2 text-[0.95rem] text-black"
+                >Email Address</label
+              >
+              <div
+                class="flex items-center border border-gray-300 rounded-[10px] h-[50px] px-4 transition focus-within:ring-2 focus-within:ring-green-500 focus-within:border-green-600 bg-white"
+              >
+                <span class="text-gray-500 flex items-center mr-3">
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path
+                      d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"
+                    ></path>
+                    <polyline points="22,6 12,13 2,6"></polyline>
+                  </svg>
                 </span>
                 <input
                   id="email"
@@ -48,21 +110,26 @@
                   type="email"
                   required
                   placeholder="Enter your registered email"
+                  class="flex-grow outline-none text-[0.95rem] text-gray-700 w-full bg-transparent"
                 />
               </div>
             </div>
 
-            <button type="submit" class="action-button" :disabled="isLoading">
+            <button
+              type="submit"
+              class="w-full py-4 bg-[#009200] text-white rounded-[10px] text-lg font-bold cursor-pointer transition shadow-md hover:bg-[#007a00] hover:-translate-y-[1px] disabled:bg-gray-300 disabled:cursor-not-allowed mt-2"
+              :disabled="isLoading"
+            >
               {{ isLoading ? 'Sending Link...' : 'Send Reset Link' }}
             </button>
-
           </form>
 
-          <div class="back-link">
+          <div class="text-center text-sm text-black font-semibold mt-8">
             Remember your password?
-            <router-link to="/login" class="link">Back to Login</router-link>
+            <router-link to="/login" class="text-[#009200] font-bold ml-1 hover:underline"
+              >Back to Login</router-link
+            >
           </div>
-
         </div>
       </div>
     </div>
@@ -70,159 +137,65 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from 'vue';
-import api from '@/services/api';
+import { defineComponent, ref } from 'vue'
+import api from '@/services/api'
 
 // Using the exact same assets as Login.vue to ensure they load
-import sloganImage from '../assets/photos/texts.png';
-import birdhouseImage from '../assets/photos/birdhouse.png';
-import pawsImage from '../assets/photos/paws.png';
-import petsImage from '../assets/photos/pets.png';
+import sloganImage from '../assets/photos/texts.png'
+import birdhouseImage from '../assets/photos/birdhouse.png'
+import pawsImage from '../assets/photos/paws.png'
+import petsImage from '../assets/photos/pets.png'
 
 export default defineComponent({
   name: 'ForgotPassword',
   setup() {
-    const email = ref('');
-    const isLoading = ref(false);
-    const notification = ref({ visible: false, message: '', type: 'success' });
+    const email = ref('')
+    const isLoading = ref(false)
+    const notification = ref({ visible: false, message: '', type: 'success' })
 
     const showNotification = (message: string, type: 'success' | 'error') => {
-      notification.value = { visible: true, message, type };
-      setTimeout(() => { notification.value.visible = false; }, 4000);
-    };
+      notification.value = { visible: true, message, type }
+      setTimeout(() => {
+        notification.value.visible = false
+      }, 4000)
+    }
 
     const handleReset = async () => {
       if (!email.value) {
-        showNotification('Please enter your email address.', 'error');
-        return;
+        showNotification('Please enter your email address.', 'error')
+        return
       }
 
-      isLoading.value = true;
+      isLoading.value = true
       try {
         // NOTE: Ensure your backend has this route: POST /api/auth/forgot-password
-        await api.post('/auth/forgot-password', { email: email.value });
+        await api.post('/auth/forgot-password', { email: email.value })
 
-        showNotification('If an account exists, a reset link has been sent!', 'success');
-        email.value = '';
+        showNotification('If an account exists, a reset link has been sent!', 'success')
+        email.value = ''
       } catch (error: any) {
         // If 404, it means the backend route doesn't exist yet.
-        const msg = error.response?.status === 404
+        const msg =
+          error.response?.status === 404
             ? 'Server Error: Route not found (404)'
-            : (error.response?.data?.message || 'Failed to send reset link.');
+            : error.response?.data?.message || 'Failed to send reset link.'
 
-        showNotification(msg, 'error');
+        showNotification(msg, 'error')
       } finally {
-        isLoading.value = false;
+        isLoading.value = false
       }
-    };
+    }
 
     return {
-      email, isLoading, notification, handleReset,
-      sloganImage, birdhouseImage, pawsImage, petsImage
-    };
+      email,
+      isLoading,
+      notification,
+      handleReset,
+      sloganImage,
+      birdhouseImage,
+      pawsImage,
+      petsImage,
+    }
   },
-});
+})
 </script>
-
-<style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
-
-* { margin: 0; padding: 0; box-sizing: border-box; }
-
-.forgot-container {
-  display: flex; height: 100vh; width: 100vw;
-  font-family: 'Poppins', sans-serif; background-color: #ffffff;
-  justify-content: center; align-items: center; position: relative;
-}
-
-/* Toast Notification */
-.toast-notification {
-  position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
-  background-color: white; padding: 12px 20px; border-radius: 50px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.15); display: flex; align-items: center;
-  gap: 12px; z-index: 1000; font-weight: 600; border-left: 4px solid;
-}
-.toast-notification.success { border-left-color: #009200; color: #006400; }
-.toast-notification.error { border-left-color: #ff0000; color: #d8000c; }
-.toast-icon { display: flex; align-items: center; }
-
-/* Main Card - EXACT copy of Login CSS */
-.card-wrapper {
-  display: flex; /* Forces row layout by default */
-  width: 90%; max-width: 1100px;
-  min-height: 600px; /* Fixed height ensures images don't squish */
-  height: 600px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1); border-radius: 30px;
-  overflow: hidden; background-color: #fff;
-}
-
-/* LEFT BANNER */
-.theme-banner {
-  flex: 0 0 45%; /* Fixed width 45% */
-  background-color: #AEE2E8;
-  padding: 50px 40px 0 40px;
-  display: flex; flex-direction: column;
-  position: relative; overflow: hidden;
-}
-
-.slogan-content { flex-grow: 1; position: relative; display: flex; flex-direction: column; }
-.slogan-img { width: 30%; max-width: 220px; height: auto; margin-bottom: 20px; z-index: 10; position: relative; }
-
-.visual-elements { position: absolute; top: 0; left: 0; right: 0; bottom: 0; pointer-events: none; }
-.birdhouse-img { position: absolute; top: 30px; right: -5px; width: 190px; height: auto; z-index: 10; }
-.paws-img { position: absolute; top: 50%; right: 40px; width: 90px; height: auto; z-index: 10; transform: translateY(-50%); }
-.pets-img { position: absolute; bottom: 0; left: 0; right: 0; width: 100%; height: auto; max-height: 55%; z-index: 5; object-fit: cover; object-position: bottom center; }
-
-/* RIGHT FORM */
-.form-area {
-  flex: 1; /* Takes remaining space */
-  padding: 40px 70px;
-  display: flex; flex-direction: column; justify-content: center;
-  align-items: center; position: relative;
-  background-color: white;
-}
-
-.close-icon {
-  position: absolute; top: 30px; right: 30px; color: #9CA3AF; transition: color 0.2s;
-}
-.close-icon:hover { color: #111; }
-
-.form-content { width: 100%; max-width: 420px; }
-.form-content h2 { font-size: 2rem; font-weight: 700; margin-bottom: 10px; text-align: center; color: #000; }
-.subtitle { text-align: center; color: #6B7280; font-size: 0.9rem; margin-bottom: 30px; line-height: 1.5; }
-
-/* Inputs */
-.input-group { margin-bottom: 25px; }
-.input-group label { display: block; font-weight: 700; margin-bottom: 8px; font-size: 0.95rem; color: #000; }
-
-.input-wrapper {
-  display: flex; align-items: center; border: 1px solid #D1D5DB; border-radius: 10px;
-  height: 50px; padding: 0 15px; transition: all 0.2s ease; background-color: #fff;
-}
-.input-wrapper:focus-within { border-color: #009200; box-shadow: 0 0 0 3px rgba(0, 146, 0, 0.1); }
-
-.input-icon { color: #6B7280; display: flex; align-items: center; margin-right: 12px; }
-.input-wrapper input { flex-grow: 1; border: none; outline: none; font-size: 0.95rem; color: #333; width: 100%; }
-
-/* Buttons */
-.action-button {
-  width: 100%; padding: 16px; background-color: #009200; color: #fff;
-  border: none; border-radius: 10px; font-size: 1.1rem; font-weight: 700;
-  cursor: pointer; transition: all 0.2s ease; margin-top: 10px;
-  box-shadow: 0 4px 10px rgba(0, 146, 0, 0.2);
-}
-.action-button:hover { background-color: #007a00; transform: translateY(-1px); }
-.action-button:disabled { background-color: #ccc; cursor: not-allowed; }
-
-.back-link { text-align: center; font-size: 0.85rem; color: #000; font-weight: 600; margin-top: 30px; }
-.back-link .link { color: #009200; font-weight: 700; text-decoration: none; margin-left: 4px; }
-.back-link .link:hover { text-decoration: underline; }
-
-/* Responsive: Switch to column on smaller screens */
-@media (max-width: 992px) {
-  .card-wrapper { flex-direction: column; height: auto; max-height: 90vh; overflow-y: auto; }
-  .theme-banner { flex: 0 0 250px; padding-top: 30px; }
-  .birdhouse-img { width: 140px; }
-  .form-area { flex: 1; padding: 40px 30px; }
-}
-</style>
