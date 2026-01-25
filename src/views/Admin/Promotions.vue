@@ -291,6 +291,30 @@
       </div>
     </transition>
 
+    <!-- Delete Confirmation Modal -->
+    <transition name="modal">
+      <div v-if="showDeleteConfirm" class="fixed inset-0 z-[60] flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" @click="cancelDelete"></div>
+        <div class="relative bg-white w-full max-w-sm rounded-[32px] shadow-2xl overflow-hidden p-8 text-center">
+          <div class="w-16 h-16 bg-rose-50 rounded-full flex items-center justify-center mx-auto mb-6">
+            <svg class="w-8 h-8 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+            </svg>
+          </div>
+          <h3 class="text-xl font-black text-slate-900 mb-2">Delete Campaign?</h3>
+          <p class="text-slate-500 text-sm font-medium mb-6">Are you sure you want to delete this campaign? This action cannot be undone.</p>
+          <div class="flex gap-3">
+            <button @click="cancelDelete" class="flex-1 px-6 py-3 bg-slate-100 text-slate-700 rounded-xl font-bold hover:bg-slate-200 transition">
+              Cancel
+            </button>
+            <button @click="confirmDelete" class="flex-1 px-6 py-3 bg-rose-500 text-white rounded-xl font-bold hover:bg-rose-600 shadow-lg shadow-rose-500/30 transition">
+              Delete
+            </button>
+          </div>
+        </div>
+      </div>
+    </transition>
+
   </div>
 </template>
 
@@ -461,14 +485,32 @@ export default defineComponent({
       resetForm();
     };
 
-    const deletePromo = async (id: string) => {
-      if(confirm('Delete this promotion?')) {
-        try {
-          await axios.delete(`${API_BASE}/promotions/${id}`, getAuthHeader());
-          toast.success("Deleted");
-          fetchPromotions();
-        } catch (e) { toast.error("Delete failed"); }
+    const showDeleteConfirm = ref(false);
+    const pendingDeleteId = ref<string | null>(null);
+
+    const deletePromo = (id: string) => {
+      pendingDeleteId.value = id;
+      showDeleteConfirm.value = true;
+    };
+
+    const confirmDelete = async () => {
+      if (!pendingDeleteId.value) return;
+      
+      try {
+        await axios.delete(`${API_BASE}/promotions/${pendingDeleteId.value}`, getAuthHeader());
+        toast.success("Deleted");
+        fetchPromotions();
+      } catch (e) { 
+        toast.error("Delete failed"); 
+      } finally {
+        showDeleteConfirm.value = false;
+        pendingDeleteId.value = null;
       }
+    };
+
+    const cancelDelete = () => {
+      showDeleteConfirm.value = false;
+      pendingDeleteId.value = null;
     };
 
     const formatDate = (iso: string) => {
@@ -517,7 +559,8 @@ export default defineComponent({
       promotions, products, isLoading, showModal, form, showProductDropdown, isEditing,
       openModal, closeModal, savePromotion, editPromo, deletePromo,
       formatDate, formatDateShort, formatMoney, getStatusText, getStatusClass, copyCode,
-      activeCount, scheduledCount, totalRedemptions, estimatedSavings, calculatePromoSavings
+      activeCount, scheduledCount, totalRedemptions, estimatedSavings, calculatePromoSavings,
+      showDeleteConfirm, confirmDelete, cancelDelete
     };
   }
 });
