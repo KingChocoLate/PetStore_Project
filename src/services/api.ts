@@ -4,6 +4,7 @@ import router from '@/router';
 // Create Axios instance
 const api = axios.create({
   baseURL: 'https://petstore-backend-api.onrender.com/api', // Production backend on Render
+  // baseURL: 'http://localhost:5000/api', // 🟢 Local Backend for Testing
   headers: {
     'Content-Type': 'application/json',
   },
