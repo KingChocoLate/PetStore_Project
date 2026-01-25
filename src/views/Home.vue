@@ -244,8 +244,8 @@ import petImg3 from '@/assets/petImage/Rectangle 131 (2).png'
 import petImg4 from '@/assets/petImage/Rectangle 131 (3).png'
 import petImg5 from '@/assets/petImage/Rectangle 131 (4).png'
 import lanternImg from '@/assets/lantern.png'
-import collarImg from '@/assets/petImage/Rectangle 131.png' // Fallback for collar
-import chewsImg from '@/assets/petImage/Rectangle 131 (3).png' // Fallback for chews
+import collarImg from '@/assets/jade_collar.png' // 🟢 Realistic Collar
+import chewsImg from '@/assets/lucky_chews.png' // 🟢 Realistic Chews
 
 export default defineComponent({
   name: 'Home',
