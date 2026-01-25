@@ -1,6 +1,14 @@
 <template>
   <div class="group relative bg-white rounded-[24px] border border-slate-100 p-5 flex flex-col transition-all duration-300 hover:shadow-xl hover:border-slate-200 hover:-translate-y-1">
 
+    <!-- Discount Badge -->
+    <div 
+      v-if="hasProductDiscount" 
+      class="absolute top-4 left-4 z-20 bg-red-500 text-white px-2 py-1 rounded-lg text-xs font-black shadow-lg"
+    >
+      {{ discountLabel }}
+    </div>
+
     <div class="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10">
       <button @click.stop="$emit('edit', product)" class="p-2 bg-white rounded-full shadow-md text-slate-500 hover:text-blue-600 hover:bg-blue-50 transition">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
@@ -38,7 +46,12 @@
       <div class="mt-4 flex items-end justify-between border-t border-slate-50 pt-3">
         <div>
           <p class="text-xs font-semibold text-slate-400">Price</p>
-          <p class="text-xl font-black text-slate-900">${{ formatPrice(product.price) }}</p>
+          <!-- Price with strikethrough for discounts -->
+          <div v-if="hasProductDiscount" class="flex flex-col">
+            <span class="text-xs text-slate-400 line-through">${{ formatPrice(product.price) }}</span>
+            <p class="text-xl font-black text-red-500">${{ formatPrice(discountedPrice) }}</p>
+          </div>
+          <p v-else class="text-xl font-black text-slate-900">${{ formatPrice(product.price) }}</p>
         </div>
         <div class="text-right">
           <p class="text-xs font-semibold text-slate-400">Stock</p>
@@ -52,9 +65,9 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, computed } from 'vue';
+import { defineComponent, computed, onMounted } from 'vue';
+import { useDiscountStore } from '@/stores/discount';
 
-// 👇 Define your backend URL constant
 const BACKEND_URL = "https://petstore-backend-api.onrender.com";
 
 export default defineComponent({
@@ -67,13 +80,34 @@ export default defineComponent({
   },
   emits: ['edit', 'delete'],
   setup(props) {
-    // 👇 Computed property to fix image URLs
+    const discountStore = useDiscountStore();
+
+    // Fetch discounts if not loaded
+    onMounted(() => {
+      if (!discountStore.isLoaded) {
+        discountStore.fetchProductDiscounts();
+      }
+    });
+
+    // Check if product has discount
+    const hasProductDiscount = computed(() => {
+      return discountStore.hasDiscount(props.product._id);
+    });
+
+    // Get discount label (e.g., "-20%")
+    const discountLabel = computed(() => {
+      return discountStore.getDiscountLabel(props.product._id);
+    });
+
+    // Get discounted price
+    const discountedPrice = computed(() => {
+      return discountStore.getDiscountedPrice(props.product._id, props.product.price);
+    });
+
     const resolvedImage = computed(() => {
       const path = props.product.imageUrl || props.product.image;
       if (!path) return 'https://via.placeholder.com/150';
-      // If it starts with http, it's already a full URL (external image)
       if (path.startsWith('http')) return path;
-      // Otherwise, prepend the backend URL
       return `${BACKEND_URL}${path}`;
     });
 
@@ -81,7 +115,14 @@ export default defineComponent({
       return Number(price).toFixed(2);
     };
 
-    return { resolvedImage, formatPrice };
+    return { 
+      resolvedImage, 
+      formatPrice,
+      hasProductDiscount,
+      discountLabel,
+      discountedPrice
+    };
   }
 });
 </script>
+

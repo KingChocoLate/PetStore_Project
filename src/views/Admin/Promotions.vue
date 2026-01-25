@@ -75,7 +75,10 @@
       >
         <div class="flex justify-between items-start mb-4">
           <div class="flex flex-col">
-            <span class="text-[10px] font-black uppercase tracking-wider text-slate-400 mb-1">Promo Code</span>
+            <span class="text-[10px] font-black uppercase tracking-wider mb-1"
+              :class="promo.campaignType === 'product_discount' ? 'text-purple-500' : 'text-emerald-500'">
+              {{ promo.campaignType === 'product_discount' ? 'Product Discount' : 'Promo Code' }}
+            </span>
             <div class="flex items-center gap-2">
               <span class="text-2xl font-black text-slate-900 tracking-tight font-mono bg-slate-100 px-3 py-1 rounded-lg border border-slate-200 border-dashed">{{ promo.code }}</span>
               <button @click="copyCode(promo.code)" class="text-slate-400 hover:text-emerald-600 transition">
@@ -132,12 +135,20 @@
             {{ getStatusText(promo) }}
           </span>
 
-          <button
-            @click="deletePromo(promo._id)"
-            class="text-xs font-bold text-red-500 hover:bg-red-50 px-3 py-1.5 rounded-xl transition"
-          >
-            Delete
-          </button>
+          <div class="flex gap-2">
+            <button
+              @click="editPromo(promo)"
+              class="text-xs font-bold text-blue-600 hover:bg-blue-50 px-3 py-1.5 rounded-xl transition"
+            >
+              Edit
+            </button>
+            <button
+              @click="deletePromo(promo._id)"
+              class="text-xs font-bold text-red-500 hover:bg-red-50 px-3 py-1.5 rounded-xl transition"
+            >
+              Delete
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -149,14 +160,50 @@
         <div class="relative bg-white w-full max-w-xl rounded-[32px] shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
 
           <div class="px-8 py-6 border-b border-slate-100 flex justify-between items-center bg-white sticky top-0 z-10">
-            <h3 class="text-xl font-black text-slate-900">New Campaign</h3>
-            <button @click="showModal = false" class="p-2 bg-slate-50 rounded-full hover:bg-slate-100 text-slate-500">✕</button>
+            <h3 class="text-xl font-black text-slate-900">{{ isEditing ? 'Edit Campaign' : 'New Campaign' }}</h3>
+            <button @click="closeModal" class="p-2 bg-slate-50 rounded-full hover:bg-slate-100 text-slate-500">✕</button>
           </div>
 
           <div class="p-8 space-y-5 overflow-y-auto">
+            <!-- Campaign Type Toggle -->
             <div>
-              <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Discount Code</label>
-              <input v-model="form.code" type="text" placeholder="e.g. WELCOME20" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 uppercase" />
+              <label class="block text-xs font-bold text-slate-500 uppercase mb-3">Campaign Type</label>
+              <div class="grid grid-cols-2 gap-3">
+                <button 
+                  type="button"
+                  @click="form.campaignType = 'promo_code'"
+                  class="p-4 rounded-xl border-2 transition-all flex flex-col items-center gap-2"
+                  :class="form.campaignType === 'promo_code' ? 'border-emerald-500 bg-emerald-50' : 'border-slate-200 hover:border-slate-300'"
+                >
+                  <div class="w-10 h-10 rounded-xl flex items-center justify-center"
+                    :class="form.campaignType === 'promo_code' ? 'bg-emerald-500 text-white' : 'bg-slate-100 text-slate-400'">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path></svg>
+                  </div>
+                  <span class="text-sm font-bold" :class="form.campaignType === 'promo_code' ? 'text-emerald-700' : 'text-slate-600'">Promo Code</span>
+                  <span class="text-[10px] text-slate-400">User enters code at checkout</span>
+                </button>
+                <button 
+                  type="button"
+                  @click="form.campaignType = 'product_discount'"
+                  class="p-4 rounded-xl border-2 transition-all flex flex-col items-center gap-2"
+                  :class="form.campaignType === 'product_discount' ? 'border-purple-500 bg-purple-50' : 'border-slate-200 hover:border-slate-300'"
+                >
+                  <div class="w-10 h-10 rounded-xl flex items-center justify-center"
+                    :class="form.campaignType === 'product_discount' ? 'bg-purple-500 text-white' : 'bg-slate-100 text-slate-400'">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                  </div>
+                  <span class="text-sm font-bold" :class="form.campaignType === 'product_discount' ? 'text-purple-700' : 'text-slate-600'">Product Discount</span>
+                  <span class="text-[10px] text-slate-400">Auto-applies to selected products</span>
+                </button>
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-slate-500 uppercase mb-2">
+                {{ form.campaignType === 'product_discount' ? 'Discount Name' : 'Discount Code' }}
+              </label>
+              <input v-model="form.code" type="text" :placeholder="form.campaignType === 'product_discount' ? 'e.g. SUMMER_SALE' : 'e.g. WELCOME20'" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 uppercase" :disabled="isEditing" />
+              <p v-if="isEditing" class="text-xs text-slate-400 mt-1">Code cannot be changed after creation.</p>
             </div>
 
             <div class="grid grid-cols-2 gap-4">
@@ -226,8 +273,8 @@
               <p class="text-xs text-slate-400 mt-1">Leave empty to apply to all products.</p>
             </div>
 
-            <!-- Minimum Purchase -->
-            <div>
+            <!-- Minimum Purchase (Only for promo_code) -->
+            <div v-if="form.campaignType === 'promo_code'">
               <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Minimum Purchase Amount</label>
               <input v-model.number="form.minPurchase" type="number" placeholder="0" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-900 focus:outline-none" />
               <p class="text-xs text-slate-400 mt-1">Set to 0 for no minimum requirement.</p>
@@ -235,8 +282,10 @@
           </div>
 
           <div class="p-6 border-t border-slate-100 bg-slate-50 flex justify-end gap-3">
-            <button @click="showModal = false" class="px-6 py-3 rounded-xl font-bold text-slate-600 hover:bg-slate-200 transition">Cancel</button>
-            <button @click="savePromotion" class="px-8 py-3 rounded-xl bg-slate-900 text-white font-bold shadow-lg hover:bg-slate-800 transition">Create Code</button>
+            <button @click="closeModal" class="px-6 py-3 rounded-xl font-bold text-slate-600 hover:bg-slate-200 transition">Cancel</button>
+            <button @click="savePromotion" class="px-8 py-3 rounded-xl bg-slate-900 text-white font-bold shadow-lg hover:bg-slate-800 transition">
+              {{ isEditing ? 'Update Campaign' : 'Create Code' }}
+            </button>
           </div>
         </div>
       </div>
@@ -272,8 +321,12 @@ export default defineComponent({
       endDate: '',
       usageLimit: 0,
       applicableProducts: [] as string[],
-      minPurchase: 0
+      minPurchase: 0,
+      campaignType: 'promo_code' as 'promo_code' | 'product_discount'
     });
+
+    const isEditing = ref(false);
+    const editingId = ref<string | null>(null);
 
     const getAuthHeader = () => {
       let token = authStore.token;
@@ -342,25 +395,70 @@ export default defineComponent({
         toast.error("Please fill all required fields");
         return;
       }
+      
+      // For product_discount, must have at least one product selected
+      if(form.campaignType === 'product_discount' && form.applicableProducts.length === 0) {
+        toast.error("Please select at least one product for Product Discount");
+        return;
+      }
+      
       try {
         const payload = {
           ...form,
           applicableProducts: form.applicableProducts.length > 0 ? form.applicableProducts : undefined,
-          minPurchase: form.minPurchase > 0 ? form.minPurchase : undefined
+          minPurchase: form.campaignType === 'promo_code' && form.minPurchase > 0 ? form.minPurchase : undefined
         };
-        await axios.post(`${API_BASE}/promotions`, payload, getAuthHeader());
-        toast.success("Campaign Created!");
-        showModal.value = false;
+        
+        if (isEditing.value && editingId.value) {
+          // UPDATE
+          await axios.put(`${API_BASE}/promotions/${editingId.value}`, payload, getAuthHeader());
+          toast.success("Campaign Updated!");
+        } else {
+          // CREATE
+          await axios.post(`${API_BASE}/promotions`, payload, getAuthHeader());
+          toast.success("Campaign Created!");
+        }
+        
+        closeModal();
         fetchPromotions();
-        // Reset form
-        form.code = '';
-        form.value = 0;
-        form.endDate = '';
-        form.applicableProducts = [];
-        form.minPurchase = 0;
       } catch (error: any) {
-        toast.error(error.response?.data?.message || "Failed to create");
+        toast.error(error.response?.data?.message || "Failed to save");
       }
+    };
+
+    const editPromo = (promo: any) => {
+      isEditing.value = true;
+      editingId.value = promo._id;
+      form.code = promo.code;
+      form.type = promo.type;
+      form.value = promo.value;
+      form.startDate = promo.startDate.slice(0, 10);
+      form.endDate = promo.endDate.slice(0, 10);
+      form.usageLimit = promo.usageLimit || 0;
+      form.applicableProducts = promo.applicableProducts?.map((p: any) => p._id || p) || [];
+      form.minPurchase = promo.minPurchase || 0;
+      form.campaignType = promo.campaignType || 'promo_code';
+      showModal.value = true;
+      showProductDropdown.value = false;
+    };
+
+    const resetForm = () => {
+      form.code = '';
+      form.type = 'percent';
+      form.value = 0;
+      form.startDate = new Date().toISOString().slice(0, 10);
+      form.endDate = '';
+      form.usageLimit = 0;
+      form.applicableProducts = [];
+      form.minPurchase = 0;
+      form.campaignType = 'promo_code';
+      isEditing.value = false;
+      editingId.value = null;
+    };
+
+    const closeModal = () => {
+      showModal.value = false;
+      resetForm();
     };
 
     const deletePromo = async (id: string) => {
@@ -405,6 +503,7 @@ export default defineComponent({
     };
 
     const openModal = () => { 
+      resetForm();
       showModal.value = true;
       showProductDropdown.value = false;
     };
@@ -415,8 +514,8 @@ export default defineComponent({
     });
 
     return {
-      promotions, products, isLoading, showModal, form, showProductDropdown,
-      openModal, savePromotion, deletePromo,
+      promotions, products, isLoading, showModal, form, showProductDropdown, isEditing,
+      openModal, closeModal, savePromotion, editPromo, deletePromo,
       formatDate, formatDateShort, formatMoney, getStatusText, getStatusClass, copyCode,
       activeCount, scheduledCount, totalRedemptions, estimatedSavings, calculatePromoSavings
     };

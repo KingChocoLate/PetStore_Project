@@ -1,6 +1,14 @@
 <template>
   <div class="product-card group relative flex flex-col justify-between bg-white border border-gray-200 rounded-xl p-4 transition-all duration-300 hover:shadow-xl hover:border-green-500 hover:-translate-y-1">
 
+    <!-- Discount Badge -->
+    <div 
+      v-if="hasProductDiscount" 
+      class="absolute top-3 left-3 z-20 bg-red-500 text-white px-2 py-1 rounded-lg text-xs font-black shadow-lg"
+    >
+      {{ discountLabel }}
+    </div>
+
     <button
       @click.prevent="toggleWishlist"
       class="absolute top-4 right-4 z-10 transition-colors duration-200 p-1"
@@ -38,7 +46,12 @@
 
       <div class="mt-auto flex items-end justify-between">
         <div>
-          <span class="block text-2xl font-bold text-[#009200]">${{ formattedPrice }}</span>
+          <!-- Price with strikethrough for discounts -->
+          <div v-if="hasProductDiscount" class="flex items-center gap-2">
+            <span class="text-sm text-gray-400 line-through">${{ formattedOriginalPrice }}</span>
+            <span class="text-2xl font-bold text-red-500">${{ formattedDiscountedPrice }}</span>
+          </div>
+          <span v-else class="block text-2xl font-bold text-[#009200]">${{ formattedOriginalPrice }}</span>
           <span class="text-[10px] uppercase tracking-wide text-gray-400">{{ product.category || 'Product' }}</span>
         </div>
 
@@ -54,12 +67,14 @@
       </div>
     </div>
   </div>
+
 </template>
 
 <script lang="ts">
-import { defineComponent, computed } from 'vue';
+import { defineComponent, computed, onMounted } from 'vue';
 import { useCartStore } from '@/stores/cart';
 import { useWishlistStore } from '@/stores/wishlist';
+import { useDiscountStore } from '@/stores/discount';
 
 const BACKEND_URL = "https://petstore-backend-api.onrender.com";
 
@@ -74,9 +89,34 @@ export default defineComponent({
   setup(props) {
     const cartStore = useCartStore();
     const wishlistStore = useWishlistStore();
+    const discountStore = useDiscountStore();
 
-    const formattedPrice = computed(() => {
+    // Fetch discounts if not loaded
+    onMounted(() => {
+      if (!discountStore.isLoaded) {
+        discountStore.fetchProductDiscounts();
+      }
+    });
+
+    // Check if product has discount
+    const hasProductDiscount = computed(() => {
+      return discountStore.hasDiscount(props.product._id);
+    });
+
+    // Get discount label (e.g., "-20%")
+    const discountLabel = computed(() => {
+      return discountStore.getDiscountLabel(props.product._id);
+    });
+
+    // Original price formatted
+    const formattedOriginalPrice = computed(() => {
       return Number(props.product.price).toFixed(2);
+    });
+
+    // Discounted price formatted
+    const formattedDiscountedPrice = computed(() => {
+      const discountedPrice = discountStore.getDiscountedPrice(props.product._id, props.product.price);
+      return discountedPrice.toFixed(2);
     });
 
     // 👇 Helper to fix image URL (handles relative/absolute/missing)
@@ -92,10 +132,17 @@ export default defineComponent({
     });
 
     const addToCart = () => {
-      // 👇 Pass the fixed URL to the cart store so it shows up correctly in the cart
+      // Pass the discounted price if applicable
+      const finalPrice = hasProductDiscount.value 
+        ? discountStore.getDiscountedPrice(props.product._id, props.product.price)
+        : props.product.price;
+      
       cartStore.addToCart({
         ...props.product,
-        image: resolvedImage.value
+        image: resolvedImage.value,
+        originalPrice: props.product.price,
+        price: finalPrice,
+        hasDiscount: hasProductDiscount.value
       });
     };
 
@@ -104,11 +151,14 @@ export default defineComponent({
     };
 
     return {
-      formattedPrice,
+      formattedOriginalPrice,
+      formattedDiscountedPrice,
       addToCart,
       isWishlisted,
       toggleWishlist,
-      resolvedImage
+      resolvedImage,
+      hasProductDiscount,
+      discountLabel
     };
   }
 });
@@ -122,3 +172,4 @@ export default defineComponent({
   overflow: hidden;
 }
 </style>
+

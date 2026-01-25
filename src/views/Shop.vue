@@ -61,10 +61,12 @@
             <ul class="space-y-1">
               <li v-for="sort in sortItems" :key="sort">
                 <button
-                  class="w-full text-left px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:text-[#009200]"
-                  :class="sort === 'Default' ? 'text-[#009200] font-bold' : 'text-gray-600'"
+                  @click="selectedSort = sort"
+                  class="w-full text-left px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex justify-between items-center"
+                  :class="selectedSort === sort ? 'bg-green-50 text-[#009200] font-bold' : 'text-gray-600 hover:bg-white hover:shadow-sm'"
                 >
                   {{ sort }}
+                  <span v-if="selectedSort === sort" class="w-2 h-2 rounded-full bg-[#009200]"></span>
                 </button>
               </li>
             </ul>
@@ -134,6 +136,7 @@ export default defineComponent({
     const error = ref('');
     const activeTab = ref('All');
     const selectedCategory = ref('All');
+    const selectedSort = ref('Default');
 
     const topTabs = ['All', 'Cat', 'Dog', 'Small Pet', 'Bird', 'Fish'];
     const categoryItems = ['All', 'Food', 'Toys', 'Furniture', 'Accessories', 'Treats'];
@@ -157,7 +160,7 @@ export default defineComponent({
 
     const filteredProducts = computed(() => {
       const searchQuery = (route.query.q as string || '').toLowerCase();
-      return products.value.filter(product => {
+      let result = products.value.filter(product => {
         const searchMatch = product.name.toLowerCase().includes(searchQuery) ||
                             (product.description && product.description.toLowerCase().includes(searchQuery));
         const catMatch = selectedCategory.value === 'All' ||
@@ -168,11 +171,23 @@ export default defineComponent({
                          (activeTab.value === 'Small Pet' && (product.category === 'Hamster' || product.description.includes('small')));
         return searchMatch && catMatch && tabMatch;
       });
+
+      // Apply sorting
+      if (selectedSort.value === 'Price: Low to High') {
+        result = [...result].sort((a, b) => a.price - b.price);
+      } else if (selectedSort.value === 'Price: High to Low') {
+        result = [...result].sort((a, b) => b.price - a.price);
+      } else if (selectedSort.value === 'Name: A-Z') {
+        result = [...result].sort((a, b) => a.name.localeCompare(b.name));
+      }
+
+      return result;
     });
 
     const resetFilters = () => {
       activeTab.value = 'All';
       selectedCategory.value = 'All';
+      selectedSort.value = 'Default';
     };
 
     onMounted(() => {
@@ -214,7 +229,7 @@ export default defineComponent({
 
     return {
       products, loading, error, topTabs, categoryItems, sortItems,
-      activeTab, selectedCategory, filteredProducts, resetFilters, showMobileFilters
+      activeTab, selectedCategory, selectedSort, filteredProducts, resetFilters, showMobileFilters
     };
   }
 })

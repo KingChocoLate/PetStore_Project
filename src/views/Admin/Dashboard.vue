@@ -152,8 +152,12 @@
                 <div class="h-full bg-slate-800 rounded-full" :style="{ width: p.percent + '%' }"></div>
               </div>
             </div>
-            <div v-if="topProducts.length === 0" class="text-center text-slate-400 text-sm py-4">
-              No sales data yet.
+            <div v-if="topProducts.length === 0" class="flex flex-col items-center justify-center py-8 text-center">
+              <div class="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center mb-3 text-slate-300">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
+              </div>
+              <p class="text-slate-400 text-sm font-medium">No products sold yet</p>
+              <p class="text-slate-300 text-xs mt-1">Sales data will appear here</p>
             </div>
           </div>
         </div>
@@ -244,8 +248,8 @@
               <div class="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center mb-3 text-slate-300">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path></svg>
               </div>
-              <p class="text-slate-400 text-sm font-medium">No promotions created yet</p>
-              <router-link to="/admin/promotions" class="text-purple-600 text-sm font-bold mt-2 hover:underline">Create your first campaign →</router-link>
+              <p class="text-slate-400 text-sm font-medium">No redemptions yet</p>
+              <p class="text-slate-300 text-xs mt-1">Promo usage will appear here</p>
             </div>
           </div>
         </div>
@@ -358,14 +362,17 @@ export default defineComponent({
         orders.forEach((o: any) => {
           if (o.orderItems && Array.isArray(o.orderItems)) {
             o.orderItems.forEach((item: any) => {
-              itemMap[item.name] = (itemMap[item.name] || 0) + item.qty;
+              // Use 'quantity' (the actual field name) with fallback to 'qty'
+              const qty = item.quantity || item.qty || 0;
+              itemMap[item.name] = (itemMap[item.name] || 0) + qty;
             });
           }
         });
 
-        // Convert to array, sort, take top 5
+        // Convert to array, sort, take top 5 - ONLY include items with qty > 0
         const sortedItems = Object.entries(itemMap)
           .map(([name, qty]) => ({ name, qty }))
+          .filter(item => item.qty > 0)  // Only show products that have been sold
           .sort((a, b) => b.qty - a.qty)
           .slice(0, 5);
 
@@ -400,8 +407,9 @@ export default defineComponent({
           estimatedSavings: estSavings
         };
 
-        // Top performing promos (by usage count)
+        // Top performing promos (by usage count) - ONLY include promos with usageCount > 0
         topPromos.value = [...promos]
+          .filter((p: any) => (p.usageCount || 0) > 0)  // Only show promos that have been used
           .sort((a: any, b: any) => (b.usageCount || 0) - (a.usageCount || 0))
           .slice(0, 3);
 

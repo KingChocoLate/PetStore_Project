@@ -143,6 +143,77 @@
           </form>
         </div>
       </div>
+
+      <!-- Recommended Products Section -->
+      <div class="border-t border-gray-100 pt-16 mt-16">
+        <div class="flex items-center justify-between mb-10">
+          <h2 class="text-3xl font-bold flex items-center gap-3">
+            <svg class="w-8 h-8 text-[#009200]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+            You May Also Like
+          </h2>
+          <router-link to="/shop" class="text-[#009200] font-bold text-sm hover:underline flex items-center gap-1">
+            View All
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+          </router-link>
+        </div>
+
+        <!-- Loading State -->
+        <div v-if="recommendedLoading" class="grid grid-cols-2 md:grid-cols-4 gap-6">
+          <div v-for="n in 4" :key="n" class="bg-gray-50 rounded-2xl p-4 h-64 animate-pulse">
+            <div class="w-full h-32 bg-gray-200 rounded-xl mb-4"></div>
+            <div class="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+            <div class="h-4 bg-gray-200 rounded w-1/2"></div>
+          </div>
+        </div>
+
+        <!-- Empty State -->
+        <div v-else-if="recommendedProducts.length === 0" class="bg-gradient-to-br from-gray-50 to-gray-100 rounded-3xl p-12 text-center border border-gray-200">
+          <div class="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm border border-gray-100">
+            <svg class="w-10 h-10 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+            </svg>
+          </div>
+          <h3 class="text-xl font-bold text-gray-700 mb-2">No Recommendations Available</h3>
+          <p class="text-gray-500 mb-6 max-w-md mx-auto">We couldn't find similar products in the <span class="font-semibold text-[#009200]">{{ product.category }}</span> category at this time.</p>
+          <router-link to="/shop" class="inline-flex items-center gap-2 px-6 py-3 bg-[#009200] text-white rounded-xl font-bold hover:bg-[#007a00] transition shadow-lg shadow-green-200">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+            Explore All Products
+          </router-link>
+        </div>
+
+        <!-- Recommended Products Grid -->
+        <div v-else class="grid grid-cols-2 md:grid-cols-4 gap-6">
+          <router-link
+            v-for="rec in recommendedProducts"
+            :key="rec._id"
+            :to="`/productDetail/${rec._id}`"
+            class="group bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm hover:shadow-xl hover:border-[#009200]/20 transition-all duration-300"
+          >
+            <div class="relative aspect-square bg-gray-50 p-4 overflow-hidden">
+              <img
+                :src="getImageUrl(rec.imageUrl || rec.image)"
+                :alt="rec.name"
+                class="w-full h-full object-contain mix-blend-multiply group-hover:scale-110 transition-transform duration-500"
+              />
+              <div class="absolute top-3 left-3">
+                <span class="px-2 py-1 bg-green-50 text-[#009200] text-[10px] font-bold uppercase rounded-full border border-green-100">
+                  {{ rec.category }}
+                </span>
+              </div>
+            </div>
+            <div class="p-4">
+              <h4 class="font-bold text-gray-900 text-sm mb-1 line-clamp-2 group-hover:text-[#009200] transition-colors">{{ rec.name }}</h4>
+              <div class="flex items-center justify-between">
+                <span class="text-lg font-bold text-[#009200]">${{ rec.price }}</span>
+                <div class="flex items-center gap-1 text-yellow-400 text-xs">
+                  <svg class="w-4 h-4 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                  <span class="text-gray-600">{{ rec.rating ? rec.rating.toFixed(1) : '0.0' }}</span>
+                </div>
+              </div>
+            </div>
+          </router-link>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -177,6 +248,11 @@ export default defineComponent({
     const rating = ref('5');
     const comment = ref('');
 
+    // Recommended products
+    const allProducts = ref<any[]>([]);
+    const recommendedLoading = ref(true);
+    const recommendedProducts = ref<any[]>([]);
+
     // 👇 Helper to fix image paths
     const getImageUrl = (path: string) => {
       if (!path) return 'https://via.placeholder.com/300';
@@ -195,12 +271,37 @@ export default defineComponent({
             // 👇 Use the helper immediately so 'mainImage' is always a valid URL
             const rawPath = product.value.imageUrl || product.value.image || '';
             mainImage.value = getImageUrl(rawPath);
+            // Fetch recommended products after getting current product
+            fetchRecommendedProducts();
         }
       } catch (err) {
         console.error(err);
         error.value = 'Failed to load product.';
       } finally {
         loading.value = false;
+      }
+    };
+
+    const fetchRecommendedProducts = async () => {
+      recommendedLoading.value = true;
+      try {
+        const response = await api.get('/products');
+        allProducts.value = response.data;
+        
+        // Filter products by same category, exclude current product, limit to 4
+        if (product.value) {
+          recommendedProducts.value = allProducts.value
+            .filter((p: any) => 
+              p.category === product.value.category && 
+              p._id !== product.value._id
+            )
+            .slice(0, 4);
+        }
+      } catch (err) {
+        console.error('Failed to fetch recommended products:', err);
+        recommendedProducts.value = [];
+      } finally {
+        recommendedLoading.value = false;
       }
     };
 
@@ -243,7 +344,8 @@ export default defineComponent({
 
     return {
       product, loading, error, mainImage, quantity, addToCart,
-      user, rating, comment, submitReview
+      user, rating, comment, submitReview,
+      recommendedProducts, recommendedLoading, getImageUrl
     };
   }
 });

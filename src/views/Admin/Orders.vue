@@ -15,14 +15,18 @@
                 <svg v-if="isLoading" class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
                 <span v-else>Refresh</span>
               </button>
-              <button class="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-md transition flex items-center gap-2">
+              <button @click="exportCSV" class="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-md transition flex items-center gap-2">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
                 Export CSV
+              </button>
+              <button @click="generateFinancialReport" class="px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold shadow-md transition flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                Revenue Report
               </button>
             </div>
           </div>
 
-          <div class="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div class="mt-8 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
             <div class="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
               <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wide">Total Orders</p>
               <p class="mt-1 text-2xl font-black text-slate-900">{{ stats.total }}</p>
@@ -31,13 +35,21 @@
               <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wide">Revenue</p>
               <p class="mt-1 text-2xl font-black text-slate-900">{{ formatMoney(stats.revenue) }}</p>
             </div>
-            <div class="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
-              <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wide">Paid Orders</p>
-              <p class="mt-1 text-2xl font-black text-emerald-600">{{ stats.paid }}</p>
+            <div class="rounded-2xl border border-emerald-100 bg-emerald-50/50 p-4 shadow-sm cursor-pointer hover:bg-emerald-50 transition" @click="activePaymentFilter = 'paid'; page = 1">
+              <p class="text-[11px] font-bold text-emerald-600 uppercase tracking-wide">Paid</p>
+              <p class="mt-1 text-2xl font-black text-emerald-600">{{ stats.paidCount }}</p>
+            </div>
+            <div class="rounded-2xl border border-amber-100 bg-amber-50/50 p-4 shadow-sm cursor-pointer hover:bg-amber-50 transition" @click="activePaymentFilter = 'unpaid'; page = 1">
+              <p class="text-[11px] font-bold text-amber-600 uppercase tracking-wide">Unpaid</p>
+              <p class="mt-1 text-2xl font-black text-amber-500">{{ stats.unpaidCount }}</p>
             </div>
             <div class="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
               <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wide">Pending</p>
-              <p class="mt-1 text-2xl font-black text-amber-500">{{ stats.pending }}</p>
+              <p class="mt-1 text-2xl font-black text-orange-500">{{ stats.pending }}</p>
+            </div>
+            <div class="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
+              <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wide">Delivered</p>
+              <p class="mt-1 text-2xl font-black text-emerald-600">{{ stats.delivered }}</p>
             </div>
           </div>
         </div>
@@ -48,22 +60,49 @@
           <div class="p-2 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
             <div class="flex flex-wrap gap-1">
               <button v-for="t in statusTabs" :key="t.key"
-                class="px-4 py-2 rounded-xl text-xs font-bold transition-all border"
+                class="px-3 py-2 rounded-xl text-xs font-bold transition-all border"
                 :class="activeStatus === t.key ? 'bg-slate-900 text-white border-slate-900 shadow-md' : 'bg-transparent text-slate-500 border-transparent hover:bg-slate-50'"
                 @click="activeStatus = t.key; page = 1">
                 {{ t.label }}
-                <span class="ml-2 px-1.5 py-0.5 rounded-md text-[10px]"
+                <span class="ml-1 px-1.5 py-0.5 rounded-md text-[10px]"
                   :class="activeStatus === t.key ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500'">
                   {{ t.count }}
                 </span>
               </button>
             </div>
-            <div class="relative w-full sm:w-72 group">
-              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <svg class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+            <div class="flex items-center gap-3">
+              <!-- Payment Status Filter -->
+              <div class="flex bg-slate-100 rounded-xl p-1 gap-1">
+                <button 
+                  @click="activePaymentFilter = 'all'; page = 1"
+                  class="px-3 py-1.5 rounded-lg text-xs font-bold transition"
+                  :class="activePaymentFilter === 'all' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'"
+                >
+                  All Payment
+                </button>
+                <button 
+                  @click="activePaymentFilter = 'paid'; page = 1"
+                  class="px-3 py-1.5 rounded-lg text-xs font-bold transition"
+                  :class="activePaymentFilter === 'paid' ? 'bg-emerald-500 text-white shadow-sm' : 'text-slate-500 hover:text-slate-700'"
+                >
+                  Paid
+                </button>
+                <button 
+                  @click="activePaymentFilter = 'unpaid'; page = 1"
+                  class="px-3 py-1.5 rounded-lg text-xs font-bold transition"
+                  :class="activePaymentFilter === 'unpaid' ? 'bg-amber-500 text-white shadow-sm' : 'text-slate-500 hover:text-slate-700'"
+                >
+                  Unpaid
+                </button>
               </div>
-              <input v-model.trim="q" type="text" placeholder="Search Order ID or Customer..."
-                class="block w-full pl-10 pr-3 py-2.5 border border-slate-200 rounded-xl bg-slate-50 text-sm font-medium focus:bg-white focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all placeholder-slate-400"/>
+              <!-- Search -->
+              <div class="relative w-full sm:w-64 group">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <svg class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                </div>
+                <input v-model.trim="q" type="text" placeholder="Search Order ID or Customer..."
+                  class="block w-full pl-10 pr-3 py-2.5 border border-slate-200 rounded-xl bg-slate-50 text-sm font-medium focus:bg-white focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all placeholder-slate-400"/>
+              </div>
             </div>
           </div>
         </section>
@@ -121,11 +160,19 @@
                   <td class="py-4 px-4 text-sm font-black text-slate-900">{{ formatMoney(o.total) }}</td>
 
                   <td class="py-4 px-4" @click.stop>
-                    <div class="relative">
+                    <!-- Show locked badge for cancelled orders -->
+                    <div v-if="o.status === 'Cancelled'" class="flex items-center gap-2">
+                      <span class="px-3 py-1.5 rounded-lg text-xs font-bold bg-rose-100 text-rose-700 border border-rose-200 flex items-center gap-1.5">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                        Cancelled
+                      </span>
+                    </div>
+                    <!-- Show dropdown for non-cancelled orders -->
+                    <div v-else class="relative inline-block">
                       <select
                         :value="o.status"
                         @change="updateStatus(o, $event)"
-                        class="appearance-none pl-3 pr-8 py-1.5 rounded-lg text-xs font-bold border outline-none cursor-pointer transition-colors w-32 focus:ring-2 focus:ring-offset-1 focus:ring-slate-200"
+                        class="appearance-none pl-3 pr-7 py-1.5 rounded-lg text-xs font-bold border outline-none cursor-pointer transition-colors focus:ring-2 focus:ring-offset-1 focus:ring-slate-200"
                         :class="statusPill(o.status)"
                       >
                          <option value="Pending">Pending</option>
@@ -134,8 +181,8 @@
                          <option value="Delivered">Delivered</option>
                          <option value="Cancelled">Cancelled</option>
                       </select>
-                      <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-current opacity-50">
-                        <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+                      <div class="pointer-events-none absolute inset-y-0 right-1.5 flex items-center">
+                        <svg class="h-3 w-3 text-current opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7" /></svg>
                       </div>
                     </div>
                   </td>
@@ -311,17 +358,52 @@
                    Invoice
                  </button>
                  <button
-                   v-if="selected.status !== 'Cancelled'"
+                   v-if="selected.status !== 'Cancelled' && selected.paymentMethod !== 'Cash' && selected.paymentMethod !== 'COD'"
                    @click="handleRefund(selected)"
                    class="px-5 py-2.5 bg-rose-50 border border-rose-200 text-rose-700 rounded-xl text-xs font-bold hover:bg-rose-100 transition flex items-center gap-2"
                  >
                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"></path></svg>
-                   Refund
+                   Cancel & Refund
                  </button>
+                 <!-- Cash/COD payment cannot be refunded -->
+                 <span
+                   v-if="selected.status !== 'Cancelled' && (selected.paymentMethod === 'Cash' || selected.paymentMethod === 'COD')"
+                   class="px-5 py-2.5 bg-slate-100 border border-slate-200 text-slate-400 rounded-xl text-xs font-bold flex items-center gap-2 cursor-not-allowed"
+                   title="Cash/COD payments cannot be auto-refunded"
+                 >
+                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                   Cash (No Refund)
+                 </span>
                </div>
                <button @click="closeDetails" class="px-6 py-2.5 bg-slate-900 text-white rounded-xl font-bold shadow-lg hover:bg-slate-800 transition">
                   Done
                </button>
+            </div>
+          </div>
+        </div>
+      </transition>
+
+      <!-- Cancel Confirmation Modal -->
+      <transition name="fade">
+        <div v-if="showCancelConfirm" class="fixed inset-0 z-[60] flex items-center justify-center p-4">
+          <div class="absolute inset-0 bg-slate-900/70 backdrop-blur-sm" @click="cancelCancelConfirm"></div>
+          <div class="relative bg-white w-full max-w-md rounded-3xl shadow-2xl overflow-hidden">
+            <div class="p-8 text-center">
+              <div class="w-16 h-16 bg-rose-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <svg class="w-8 h-8 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                </svg>
+              </div>
+              <h3 class="text-xl font-black text-slate-900 mb-2">Cancel This Order?</h3>
+              <p class="text-slate-500 mb-6">This action <span class="font-bold text-rose-600">cannot be undone</span>. The order will be permanently cancelled and status changes will be locked.</p>
+              <div class="flex gap-3">
+                <button @click="cancelCancelConfirm" class="flex-1 px-6 py-3 bg-slate-100 text-slate-700 rounded-xl font-bold hover:bg-slate-200 transition">
+                  Keep Order
+                </button>
+                <button @click="confirmCancelOrder" class="flex-1 px-6 py-3 bg-rose-600 text-white rounded-xl font-bold hover:bg-rose-700 transition">
+                  Yes, Cancel
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -346,7 +428,7 @@ import { useAuthStore } from '@/stores/auth';
 
 const API_BASE = "https://petstore-backend-api.onrender.com/api";
 
-type Status = "Paid" | "Pending" | "Shipped" | "Cancelled" | "Processing" | "Delivered";
+type Status = "Paid" | "Pending" | "Shipped" | "Cancelled" | "Processing" | "Delivered" | "Refunded";
 
 interface OrderRow {
   id: string;
@@ -381,6 +463,10 @@ export default defineComponent({
       pageSize: 8,
       showDetails: false,
       selected: null as OrderRow | null,
+      showCancelConfirm: false,
+      pendingCancelOrder: null as OrderRow | null,
+      pendingCancelEvent: null as any,
+      activePaymentFilter: 'all' as 'all' | 'paid' | 'unpaid',
     };
   },
   setup() {
@@ -392,18 +478,27 @@ export default defineComponent({
     statusTabs() {
       const all = this.orders.length;
       const pending = this.orders.filter(o => o.status === 'Pending').length;
-      const paid = this.orders.filter(o => o.status === 'Paid').length;
+      const processing = this.orders.filter(o => o.status === 'Processing').length;
       const shipped = this.orders.filter(o => o.status === 'Shipped').length;
+      const delivered = this.orders.filter(o => o.status === 'Delivered').length;
+      const cancelled = this.orders.filter(o => o.status === 'Cancelled').length;
       return [
         { key: "all", label: "All", count: all },
         { key: "Pending", label: "Pending", count: pending },
-        { key: "Paid", label: "Paid", count: paid },
+        { key: "Processing", label: "Processing", count: processing },
         { key: "Shipped", label: "Shipped", count: shipped },
+        { key: "Delivered", label: "Delivered", count: delivered },
+        { key: "Cancelled", label: "Cancelled", count: cancelled },
       ];
     },
     filteredSorted() {
       let list = this.orders;
+      // Filter by status
       if (this.activeStatus !== "all") list = list.filter(o => o.status === this.activeStatus);
+      // Filter by payment status
+      if (this.activePaymentFilter === 'paid') list = list.filter(o => o.isPaid);
+      if (this.activePaymentFilter === 'unpaid') list = list.filter(o => !o.isPaid);
+      // Search
       const search = this.q.toLowerCase().trim();
       if (search) list = list.filter(o => o.id.toLowerCase().includes(search) || o.customer.toLowerCase().includes(search));
       return list.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
@@ -414,11 +509,15 @@ export default defineComponent({
       return this.filteredSorted.slice(start, start + this.pageSize);
     },
     stats() {
+      const pending = this.orders.filter(o => o.status === 'Pending').length;
+      const delivered = this.orders.filter(o => o.status === 'Delivered').length;
       return {
         total: this.orders.length,
         revenue: this.orders.reduce((s, o) => s + (o.total || 0), 0),
-        paid: this.orders.filter(o => o.status === 'Paid' || o.status === 'Delivered').length,
-        pending: this.orders.filter(o => o.status === 'Pending').length,
+        paidCount: this.orders.filter(o => o.isPaid).length,
+        unpaidCount: this.orders.filter(o => !o.isPaid).length,
+        pending: pending,
+        delivered: delivered,
       };
     }
   },
@@ -464,7 +563,8 @@ export default defineComponent({
         Shipped: "bg-blue-50 text-blue-700 border-blue-100",
         Delivered: "bg-emerald-100 text-emerald-800 border-emerald-200",
         Cancelled: "bg-rose-50 text-rose-700 border-rose-100",
-        Processing: "bg-indigo-50 text-indigo-700 border-indigo-100"
+        Processing: "bg-indigo-50 text-indigo-700 border-indigo-100",
+        Refunded: "bg-purple-50 text-purple-700 border-purple-100"
       };
       return map[status] || "bg-slate-50 text-slate-700 border-slate-100";
     },
@@ -523,6 +623,23 @@ export default defineComponent({
 
     async updateStatus(order: OrderRow, event: any) {
        const newStatus = event.target ? event.target.value : event;
+       
+       // If order is already cancelled, prevent any changes
+       if (order.status === 'Cancelled') {
+         this.showToast("Cannot modify a cancelled order.");
+         return;
+       }
+       
+       // If changing to Cancelled, show confirmation modal
+       if (newStatus === 'Cancelled') {
+         this.pendingCancelOrder = order;
+         this.pendingCancelEvent = event;
+         this.showCancelConfirm = true;
+         // Reset the select to old value (will update if confirmed)
+         if (event.target) event.target.value = order.status;
+         return;
+       }
+       
        const oldStatus = order.status;
        order.status = newStatus;
 
@@ -534,6 +651,36 @@ export default defineComponent({
           order.status = oldStatus;
           this.showToast("Failed to update status.");
        }
+    },
+
+    cancelCancelConfirm() {
+      this.showCancelConfirm = false;
+      this.pendingCancelOrder = null;
+      this.pendingCancelEvent = null;
+    },
+
+    async confirmCancelOrder() {
+      if (!this.pendingCancelOrder) return;
+      
+      const order = this.pendingCancelOrder;
+      const oldStatus = order.status;
+      order.status = 'Cancelled' as Status;
+      
+      try {
+        await axios.put(`${API_BASE}/orders/${order.id}/status`, { status: 'Cancelled' }, this.getAuthHeader());
+        this.showToast("Order has been cancelled.");
+        // Update in main orders array
+        const idx = this.orders.findIndex(o => o.id === order.id);
+        if (idx !== -1 && this.orders[idx]) {
+          this.orders[idx].status = 'Cancelled' as Status;
+        }
+      } catch (error) {
+        console.error(error);
+        order.status = oldStatus;
+        this.showToast("Failed to cancel order.");
+      } finally {
+        this.cancelCancelConfirm();
+      }
     },
 
     async markAsPaid(order: OrderRow) {
@@ -555,23 +702,36 @@ export default defineComponent({
     },
 
     async handleRefund(order: OrderRow) {
-      if (!confirm(`Are you sure you want to refund order #${order.id.slice(-6).toUpperCase()}? This action cannot be undone.`)) {
-        return;
-      }
+      const oldStatus = order.status;
       
       try {
-        // Update status to Cancelled (which implies refunded)
+        // Cancel the order
         await axios.put(`${API_BASE}/orders/${order.id}/status`, { status: 'Cancelled' }, this.getAuthHeader());
+        
+        // Update local state
         order.status = 'Cancelled' as Status;
+        
         // Update in main orders array
         const idx = this.orders.findIndex(o => o.id === order.id);
         if (idx !== -1 && this.orders[idx]) {
           this.orders[idx].status = 'Cancelled' as Status;
         }
-        this.showToast("Order has been refunded and cancelled.");
-      } catch (error) {
-        console.error(error);
-        this.showToast("Failed to process refund.");
+        
+        // If in detail view, update selected
+        if (this.selected && this.selected.id === order.id) {
+          this.selected.status = 'Cancelled' as Status;
+        }
+        
+        // Show success
+        this.showToast(`Order cancelled. Refund ${this.formatMoney(order.total)} to ${order.customer}`);
+        
+        // Close the details modal
+        this.closeDetails();
+        
+      } catch (error: any) {
+        console.error('Refund error:', error);
+        order.status = oldStatus;
+        this.showToast("Failed to cancel order. Please try again.");
       }
     },
 
@@ -736,6 +896,210 @@ export default defineComponent({
       }
 
       this.showToast("Invoice generated successfully!");
+    },
+
+    // Export all orders to CSV
+    exportCSV() {
+      if (this.orders.length === 0) {
+        this.showToast("No orders to export.");
+        return;
+      }
+
+      const headers = ['Order ID', 'Customer', 'Email', 'Date', 'Total', 'Status', 'Payment Status', 'Payment Method'];
+      const rows = this.orders.map(o => [
+        o.id,
+        o.customer,
+        o.email,
+        this.formatDate(o.date),
+        o.total.toFixed(2),
+        o.status,
+        o.isPaid ? 'Paid' : 'Unpaid',
+        o.paymentMethod
+      ]);
+
+      const csvContent = [
+        headers.join(','),
+        ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
+      ].join('\n');
+
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `Orders_Export_${new Date().toISOString().slice(0, 10)}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      this.showToast("Orders exported to CSV!");
+    },
+
+    // Generate simple financial report
+    generateFinancialReport() {
+      const totalRevenue = this.orders.reduce((sum, o) => sum + (o.total || 0), 0);
+      const paidOrders = this.orders.filter(o => o.isPaid);
+      const paidRevenue = paidOrders.reduce((sum, o) => sum + (o.total || 0), 0);
+      const pendingRevenue = totalRevenue - paidRevenue;
+      
+      const cancelledOrders = this.orders.filter(o => o.status === 'Cancelled');
+      const refundedOrders = this.orders.filter(o => o.status === 'Refunded');
+      const deliveredOrders = this.orders.filter(o => o.status === 'Delivered');
+      
+      const avgOrderValue = this.orders.length > 0 ? totalRevenue / this.orders.length : 0;
+
+      // Group by month
+      const byMonth: Record<string, { count: number; revenue: number }> = {};
+      this.orders.forEach(o => {
+        const month = new Date(o.date).toLocaleDateString('en-US', { year: 'numeric', month: 'short' });
+        if (!byMonth[month]) byMonth[month] = { count: 0, revenue: 0 };
+        byMonth[month].count++;
+        byMonth[month].revenue += o.total || 0;
+      });
+
+      const reportHTML = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="UTF-8">
+          <title>Financial Report - PetStore+</title>
+          <style>
+            * { margin: 0; padding: 0; box-sizing: border-box; }
+            body { font-family: 'Segoe UI', sans-serif; padding: 40px; background: #f8fafc; }
+            .report { max-width: 900px; margin: 0 auto; background: white; padding: 50px; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+            .header { text-align: center; margin-bottom: 40px; padding-bottom: 30px; border-bottom: 3px solid #0f172a; }
+            .logo { font-size: 28px; font-weight: 900; color: #0f172a; }
+            .date { color: #64748b; font-size: 12px; margin-top: 8px; }
+            .section { margin-bottom: 40px; }
+            .section-title { font-size: 14px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 20px; }
+            .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+            .stat-card { background: #f8fafc; border-radius: 12px; padding: 24px; border: 1px solid #e2e8f0; }
+            .stat-label { font-size: 11px; color: #64748b; font-weight: 600; text-transform: uppercase; margin-bottom: 8px; }
+            .stat-value { font-size: 28px; font-weight: 900; color: #0f172a; }
+            .stat-value.green { color: #059669; }
+            .stat-value.amber { color: #d97706; }
+            .stat-value.red { color: #dc2626; }
+            table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+            th { text-align: left; padding: 12px 16px; font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; background: #f8fafc; border-bottom: 2px solid #e2e8f0; }
+            td { padding: 14px 16px; font-size: 14px; color: #0f172a; border-bottom: 1px solid #f1f5f9; font-weight: 500; }
+            .footer { margin-top: 50px; padding-top: 20px; border-top: 1px solid #e2e8f0; text-align: center; color: #94a3b8; font-size: 12px; }
+            @media print { body { padding: 0; background: white; } .report { box-shadow: none; } }
+          </style>
+        </head>
+        <body>
+          <div class="report">
+            <div class="header">
+              <div class="logo">PetStore+ Financial Report</div>
+              <div class="date">Generated on ${new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</div>
+            </div>
+
+            <div class="section">
+              <div class="section-title">Revenue Summary</div>
+              <div class="stats-grid">
+                <div class="stat-card">
+                  <div class="stat-label">Total Revenue</div>
+                  <div class="stat-value">${this.formatMoney(totalRevenue)}</div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-label">Collected (Paid)</div>
+                  <div class="stat-value green">${this.formatMoney(paidRevenue)}</div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-label">Pending Collection</div>
+                  <div class="stat-value amber">${this.formatMoney(pendingRevenue)}</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="section">
+              <div class="section-title">Order Statistics</div>
+              <div class="stats-grid">
+                <div class="stat-card">
+                  <div class="stat-label">Total Orders</div>
+                  <div class="stat-value">${this.orders.length}</div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-label">Avg. Order Value</div>
+                  <div class="stat-value">${this.formatMoney(avgOrderValue)}</div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-label">Delivered Orders</div>
+                  <div class="stat-value green">${deliveredOrders.length}</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="section">
+              <div class="section-title">Order Status Breakdown</div>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Status</th>
+                    <th>Count</th>
+                    <th>Percentage</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr><td>Pending</td><td>${this.orders.filter(o => o.status === 'Pending').length}</td><td>${(this.orders.filter(o => o.status === 'Pending').length / this.orders.length * 100).toFixed(1)}%</td></tr>
+                  <tr><td>Processing</td><td>${this.orders.filter(o => o.status === 'Processing').length}</td><td>${(this.orders.filter(o => o.status === 'Processing').length / this.orders.length * 100).toFixed(1)}%</td></tr>
+                  <tr><td>Shipped</td><td>${this.orders.filter(o => o.status === 'Shipped').length}</td><td>${(this.orders.filter(o => o.status === 'Shipped').length / this.orders.length * 100).toFixed(1)}%</td></tr>
+                  <tr><td>Delivered</td><td>${deliveredOrders.length}</td><td>${(deliveredOrders.length / this.orders.length * 100).toFixed(1)}%</td></tr>
+                  <tr><td>Cancelled</td><td>${cancelledOrders.length}</td><td>${(cancelledOrders.length / this.orders.length * 100).toFixed(1)}%</td></tr>
+                  <tr><td>Refunded</td><td>${refundedOrders.length}</td><td>${(refundedOrders.length / this.orders.length * 100).toFixed(1)}%</td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="section">
+              <div class="section-title">Revenue by Month</div>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Month</th>
+                    <th>Orders</th>
+                    <th>Revenue</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${Object.entries(byMonth).map(([month, data]) => `
+                    <tr>
+                      <td>${month}</td>
+                      <td>${data.count}</td>
+                      <td>${this.formatMoney(data.revenue)}</td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            </div>
+
+            <div class="footer">
+              This report was automatically generated by PetStore+ Admin Dashboard<br>
+              © ${new Date().getFullYear()} PetStore+ • All Rights Reserved
+            </div>
+          </div>
+        </body>
+        </html>
+      `;
+
+      // Download
+      const blob = new Blob([reportHTML], { type: 'text/html' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `Financial_Report_${new Date().toISOString().slice(0, 10)}.html`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      // Open in new window
+      const printWindow = window.open('', '_blank');
+      if (printWindow) {
+        printWindow.document.write(reportHTML);
+        printWindow.document.close();
+      }
+
+      this.showToast("Financial report generated!");
     }
   }
 });

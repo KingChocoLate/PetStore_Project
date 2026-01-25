@@ -59,6 +59,8 @@
                    <div>
                       <h3 class="text-lg font-bold text-gray-900 line-clamp-1">{{ item.name }}</h3>
                       <p class="text-sm text-gray-500 font-medium">{{ item.category }}</p>
+                      <!-- Show discount badge if applicable -->
+                      <span v-if="item.hasDiscount" class="inline-block mt-1 text-[10px] font-bold px-2 py-0.5 rounded bg-red-100 text-red-600">DISCOUNTED</span>
                    </div>
                    <button
                       @click="cartStore.removeFromCart(item._id)"
@@ -78,7 +80,12 @@
 
                    <div class="text-right">
                       <p class="text-xs text-gray-400 mb-0.5">Total</p>
-                      <p class="text-xl font-extrabold text-[#009200]">${{ (item.price * item.quantity).toFixed(2) }}</p>
+                      <!-- Show strikethrough for discounted items -->
+                      <div v-if="item.hasDiscount && item.originalPrice" class="flex flex-col items-end">
+                        <span class="text-xs text-gray-400 line-through">${{ (item.originalPrice * item.quantity).toFixed(2) }}</span>
+                        <p class="text-xl font-extrabold text-red-500">${{ (item.price * item.quantity).toFixed(2) }}</p>
+                      </div>
+                      <p v-else class="text-xl font-extrabold text-[#009200]">${{ (item.price * item.quantity).toFixed(2) }}</p>
                    </div>
                 </div>
               </div>

@@ -31,6 +31,14 @@
           :key="item._id"
           class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex flex-col group hover:shadow-xl hover:-translate-y-1 transition-all duration-300 relative"
         >
+          <!-- Discount Badge -->
+          <div 
+            v-if="hasDiscount(item._id)" 
+            class="absolute top-3 left-3 z-20 bg-red-500 text-white px-2 py-1 rounded-lg text-xs font-black shadow-lg"
+          >
+            {{ getDiscountLabel(item._id) }}
+          </div>
+
           <button
             @click="wishlistStore.removeFromWishlist(item._id)"
             class="absolute top-4 right-4 z-10 w-8 h-8 bg-white rounded-full shadow-md flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-red-50 transition"
@@ -50,7 +58,12 @@
                  {{ item.name }}
                </h3>
                <div class="flex items-center justify-between">
-                  <span class="text-xl font-extrabold text-gray-900">${{ item.price.toFixed(2) }}</span>
+                  <!-- Price with strikethrough for discounts -->
+                  <div v-if="hasDiscount(item._id)" class="flex items-center gap-2">
+                    <span class="text-sm text-gray-400 line-through">${{ item.price.toFixed(2) }}</span>
+                    <span class="text-xl font-extrabold text-red-500">${{ getDiscountedPrice(item._id, item.price).toFixed(2) }}</span>
+                  </div>
+                  <span v-else class="text-xl font-extrabold text-gray-900">${{ item.price.toFixed(2) }}</span>
                   <span class="text-xs font-bold px-2 py-1 rounded bg-green-100 text-green-700">In Stock</span>
                </div>
             </div>
@@ -72,30 +85,58 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, onMounted } from 'vue';
 import { useWishlistStore } from '@/stores/wishlist';
 import { useCartStore } from '@/stores/cart';
-import { useToast } from "vue-toastification"; // ✅ Uses your modern toast
+import { useDiscountStore } from '@/stores/discount';
+import { useToast } from "vue-toastification";
 
 export default defineComponent({
   name: 'WishlistView',
   setup() {
     const wishlistStore = useWishlistStore();
     const cartStore = useCartStore();
+    const discountStore = useDiscountStore();
     const toast = useToast();
 
+    // Fetch discounts on mount
+    onMounted(() => {
+      if (!discountStore.isLoaded) {
+        discountStore.fetchProductDiscounts();
+      }
+    });
+
+    // Discount helpers
+    const hasDiscount = (productId: string) => discountStore.hasDiscount(productId);
+    const getDiscountLabel = (productId: string) => discountStore.getDiscountLabel(productId);
+    const getDiscountedPrice = (productId: string, originalPrice: number) => 
+      discountStore.getDiscountedPrice(productId, originalPrice);
+
     const moveToCart = (item: any) => {
-      cartStore.addToCart(item);
+      // Calculate final price with discount if applicable
+      const finalPrice = hasDiscount(item._id) 
+        ? getDiscountedPrice(item._id, item.price) 
+        : item.price;
+
+      cartStore.addToCart({
+        ...item,
+        originalPrice: item.price,
+        price: finalPrice,
+        hasDiscount: hasDiscount(item._id)
+      });
       wishlistStore.removeFromWishlist(item._id);
 
-      // Modern Toast Feedback
       toast.success("Moved to Cart!", {
          timeout: 2000,
          hideProgressBar: true,
       });
     };
 
-    return { wishlistStore, moveToCart };
+    return { 
+      wishlistStore, moveToCart, 
+      hasDiscount, getDiscountLabel, getDiscountedPrice 
+    };
   }
 });
 </script>
+

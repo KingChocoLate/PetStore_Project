@@ -158,14 +158,26 @@
 
             <div class="space-y-4 mb-8 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
                <div v-for="item in cartStore.items" :key="item._id" class="flex items-start gap-4">
-                 <div class="w-16 h-16 bg-gray-50 rounded-lg border border-gray-100 p-1 flex-shrink-0">
+                 <div class="w-16 h-16 bg-gray-50 rounded-lg border border-gray-100 p-1 flex-shrink-0 relative">
                     <img :src="item.image" class="w-full h-full object-contain mix-blend-multiply" />
+                    <!-- Discount indicator -->
+                    <div v-if="item.hasDiscount" class="absolute -top-1 -left-1 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center">
+                      <span class="text-[8px] text-white font-bold">%</span>
+                    </div>
                  </div>
                  <div class="flex-1">
                     <h4 class="font-bold text-sm text-gray-900 line-clamp-1">{{ item.name }}</h4>
                     <p class="text-xs text-gray-500">Qty: {{ item.quantity }}</p>
+                    <span v-if="item.hasDiscount" class="text-[10px] font-bold text-red-500">DISCOUNTED</span>
                  </div>
-                 <span class="font-bold text-sm">${{ (item.price * item.quantity).toFixed(2) }}</span>
+                 <!-- Price with strikethrough for discounts -->
+                 <div class="text-right">
+                   <div v-if="item.hasDiscount && item.originalPrice" class="flex flex-col items-end">
+                     <span class="text-xs text-gray-400 line-through">${{ (item.originalPrice * item.quantity).toFixed(2) }}</span>
+                     <span class="font-bold text-sm text-red-500">${{ (item.price * item.quantity).toFixed(2) }}</span>
+                   </div>
+                   <span v-else class="font-bold text-sm">${{ (item.price * item.quantity).toFixed(2) }}</span>
+                 </div>
                </div>
             </div>
 
