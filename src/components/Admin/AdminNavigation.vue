@@ -33,7 +33,7 @@
               <h4 class="font-bold text-slate-900 text-sm">Notifications</h4>
               <span class="text-xs font-bold text-slate-400">{{ totalNotifications }} alerts</span>
             </div>
-            
+
             <div class="max-h-80 overflow-y-auto divide-y divide-slate-50">
               <!-- New Orders -->
               <router-link v-if="notifications.newOrders > 0" to="/admin/orders" @click="notifOpen = false" class="flex items-center gap-3 px-4 py-3 hover:bg-slate-50 transition cursor-pointer">
@@ -156,15 +156,17 @@ export default defineComponent({
     });
 
     const totalNotifications = computed(() => {
-      return notifications.value.newOrders + 
-             notifications.value.pendingPayments + 
-             notifications.value.lowStock + 
+      return notifications.value.newOrders +
+             notifications.value.pendingPayments +
+             notifications.value.lowStock +
              notifications.value.newCustomers;
     });
 
     const initials = computed(() => {
       const parts = (props.name || "A").split(" ");
-      return parts[0][0] + (parts.length > 1 ? parts[1][0] : "");
+      const first = parts[0]?.[0] ?? "A";
+      const second = parts.length > 1 ? (parts[1]?.[0] ?? "") : "";
+      return first + second;
     });
 
     const getAuthHeader = () => {
@@ -208,13 +210,13 @@ export default defineComponent({
       }
     };
 
-    const toggleMenu = () => { 
-      menuOpen.value = !menuOpen.value; 
+    const toggleMenu = () => {
+      menuOpen.value = !menuOpen.value;
       if (menuOpen.value) notifOpen.value = false;
     };
 
-    const toggleNotifications = () => { 
-      notifOpen.value = !notifOpen.value; 
+    const toggleNotifications = () => {
+      notifOpen.value = !notifOpen.value;
       if (notifOpen.value) menuOpen.value = false;
     };
 
@@ -239,14 +241,14 @@ export default defineComponent({
       // Refresh notifications every 60 seconds
       const interval = setInterval(fetchNotifications, 60000);
       document.addEventListener('click', handleClickOutside);
-      
+
       onUnmounted(() => {
         clearInterval(interval);
         document.removeEventListener('click', handleClickOutside);
       });
     });
 
-    return { 
+    return {
       query, menuOpen, notifOpen, initials, toggleMenu, toggleNotifications, handleLogout,
       notifications, totalNotifications
     };
