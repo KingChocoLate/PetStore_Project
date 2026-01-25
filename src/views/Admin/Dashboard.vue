@@ -75,31 +75,111 @@
         <div class="lg:col-span-2 bg-white rounded-[32px] p-8 border border-slate-100 shadow-sm">
           <div class="flex items-center justify-between mb-6">
             <h3 class="text-lg font-black text-slate-900">Revenue Analytics</h3>
-            <span class="text-xs font-bold bg-slate-50 border border-slate-200 rounded-lg px-2 py-1">2026</span>
+            <!-- Period Toggle -->
+            <div class="flex bg-slate-100 rounded-xl p-1 gap-1">
+              <button 
+                v-for="mode in (['daily', 'monthly', 'yearly'] as const)" 
+                :key="mode"
+                @click="chartMode = mode"
+                class="px-3 py-1.5 text-xs font-bold rounded-lg capitalize transition-all"
+                :class="chartMode === mode ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'"
+              >
+                {{ mode }}
+              </button>
+            </div>
           </div>
 
-          <div class="relative h-64 w-full">
-            <div class="absolute inset-0 flex flex-col justify-between">
-              <div v-for="i in 5" :key="i" class="w-full h-px bg-slate-100"></div>
+          <!-- Chart Container with Y-axis labels -->
+          <div class="flex gap-4">
+            <!-- Y-Axis Labels - matches h-64 chart area for perfect alignment -->
+            <div class="flex flex-col justify-between text-xs font-medium text-slate-400 w-16 text-right h-64">
+              <span>{{ formatChartValue(chartMaxValue) }}</span>
+              <span>{{ formatChartValue(chartMaxValue * 0.75) }}</span>
+              <span>{{ formatChartValue(chartMaxValue * 0.5) }}</span>
+              <span>{{ formatChartValue(chartMaxValue * 0.25) }}</span>
+              <span>$0</span>
             </div>
 
-            <svg class="absolute inset-0 w-full h-full overflow-visible" preserveAspectRatio="none">
-              <defs>
-                <linearGradient id="chartGradient" x1="0" x2="0" y1="0" y2="1">
-                  <stop offset="0%" stop-color="#10B981" stop-opacity="0.2"/>
-                  <stop offset="100%" stop-color="#10B981" stop-opacity="0"/>
-                </linearGradient>
-              </defs>
-              <path :d="areaPath" fill="url(#chartGradient)" />
-              <path :d="linePath" fill="none" stroke="#10B981" stroke-width="3" stroke-linecap="round" vector-effect="non-scaling-stroke" />
-              <circle v-for="(p, i) in points" :key="i" :cx="p.x" :cy="p.y" r="4" fill="#fff" stroke="#10B981" stroke-width="2" class="hover:r-6 transition-all cursor-pointer">
-                <title>${{ revenueSeries[i] }}</title>
-              </circle>
-            </svg>
+            <!-- Chart Area -->
+            <div 
+              class="relative h-64 w-full overflow-hidden"
+              @mousemove="handleChartHover"
+              @mouseleave="chartHoverIndex = -1"
+            >
+              <!-- Grid Lines -->
+              <div class="absolute inset-0 flex flex-col justify-between pointer-events-none">
+                <div v-for="i in 5" :key="i" class="w-full h-px bg-slate-100"></div>
+              </div>
+
+              <!-- SVG Chart with explicit viewBox for proper coordinate mapping -->
+              <svg class="absolute inset-0 w-full h-full overflow-visible" viewBox="0 0 100 100" preserveAspectRatio="none">
+                <defs>
+                  <linearGradient id="chartGradient" x1="0" x2="0" y1="0" y2="1">
+                    <stop offset="0%" stop-color="#10B981" stop-opacity="0.2"/>
+                    <stop offset="100%" stop-color="#10B981" stop-opacity="0"/>
+                  </linearGradient>
+                </defs>
+                <path :d="areaPath" fill="url(#chartGradient)" />
+                <path :d="linePath" fill="none" stroke="#10B981" stroke-width="3" stroke-linecap="round" vector-effect="non-scaling-stroke" />
+              </svg>
+              
+              <!-- Circle marker - placed OUTSIDE SVG to maintain perfect circle shape -->
+              <div 
+                v-if="chartHoverIndex >= 0 && peakValleyIndices.includes(chartHoverIndex) && points[chartHoverIndex]"
+                class="absolute w-4 h-4 bg-white border-[3px] border-emerald-500 rounded-full shadow-md transform -translate-x-1/2 -translate-y-1/2 pointer-events-none z-20"
+                :style="{ 
+                  left: `${points[chartHoverIndex]?.x}%`, 
+                  top: `${points[chartHoverIndex]?.y}%` 
+                }"
+              ></div>
+
+              <!-- Visible Data Points (Always visible) -->
+               <div 
+                 v-for="(point, i) in points" 
+                 :key="i"
+                 class="absolute w-2 h-2 bg-emerald-500 rounded-full transform -translate-x-1/2 -translate-y-1/2 pointer-events-none"
+                 :style="{ 
+                   left: `${point.x}%`, 
+                   top: `${point.y}%` 
+                 }"
+               ></div>
+
+              <!-- Hover Vertical Line & Tooltip -->
+              <div 
+                v-if="chartHoverIndex >= 0"
+                class="absolute top-0 bottom-0 pointer-events-none z-10"
+                :style="{ left: `${(chartHoverIndex * (100 / Math.max(chartLabels.length, 1))) + (100 / Math.max(chartLabels.length, 1) / 2)}%` }"
+              >
+                <!-- Vertical Line -->
+                <div class="h-full w-px bg-emerald-500 mx-auto"></div>
+                
+                <!-- Tooltip -->
+                 <div class="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-slate-800 text-white text-xs py-1 px-2 rounded shadow-lg whitespace-nowrap">
+                  {{ formatMoney(currentRevenueSeries[chartHoverIndex] || 0) }}
+                  <div class="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-slate-900"></div>
+                </div>
+                
+                <!-- Date Label -->
+                <div 
+                  class="absolute -translate-x-1/2 bg-emerald-500 text-white text-[10px] font-bold px-2 py-1 rounded shadow"
+                  :style="{ bottom: '-28px' }"
+                >
+                  {{ chartLabels[chartHoverIndex] }}
+                </div>
+              </div>
+            </div>
           </div>
 
-          <div class="flex justify-between mt-4 text-xs font-semibold text-slate-400">
-            <span v-for="m in ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']" :key="m">{{ m }}</span>
+          <!-- X-Axis Labels - aligned to match chart data points -->
+          <div class="flex gap-4 mt-4">
+            <div class="w-16"></div>
+            <div class="flex-1 flex text-xs font-semibold text-slate-400">
+              <span 
+                v-for="(label, idx) in chartLabels" 
+                :key="idx" 
+                class="text-center flex-1"
+              >{{ label }}</span>
+            </div>
           </div>
         </div>
 
@@ -132,7 +212,7 @@
             </div>
             <div class="flex items-center gap-2">
               <div class="w-3 h-3 rounded-full bg-amber-400"></div>
-              <span class="text-sm font-bold text-slate-600">Pending ({{ stats.pendingPercent }}%)</span>
+              <span class="text-sm font-bold text-slate-600">Unpaid ({{ stats.pendingPercent }}%)</span>
             </div>
           </div>
         </div>
@@ -272,6 +352,9 @@ export default defineComponent({
     const authStore = useAuthStore();
     const isLoading = ref(true);
 
+    // Chart mode for Revenue Analytics (removed 'weekly')
+    const chartMode = ref<'daily' | 'monthly' | 'yearly'>('monthly');
+
     // Stats Container
     const stats = ref({
       revenue: 0,
@@ -286,7 +369,10 @@ export default defineComponent({
       trend: 0
     });
 
-    // 👇 FIXED: Typed explicitly as any[] to solve TypeScript error
+    // Store all orders for chart calculations
+    const allOrders = ref<any[]>([]);
+    const allPromos = ref<any[]>([]);
+
     const recentOrders = ref<any[]>([]);
     const topProducts = ref<{name: string, qty: number, percent: number}[]>([]);
     const topPromos = ref<any[]>([]);
@@ -298,8 +384,14 @@ export default defineComponent({
       estimatedSavings: 0
     });
 
-    // Revenue Data for Chart (12 months)
+    // Revenue Data for Chart (storage for different modes)
     const revenueSeries = ref(new Array(12).fill(0));
+    const dailyRevenue = ref(new Array(7).fill(0));   // Last 7 days
+    const weeklyRevenue = ref(new Array(8).fill(0));  // Last 8 weeks
+    const yearlyRevenue = ref(new Array(5).fill(0));  // Last 5 years
+
+    // Chart hover state
+    const chartHoverIndex = ref(-1);
 
     const getAuthHeader = () => {
       let token = authStore.token || localStorage.getItem('userToken');
@@ -327,9 +419,40 @@ export default defineComponent({
         const promos = promosRes.data || [];
 
         // --- CALCULATE KPI ---
-        const totalRev = orders.filter((o: any) => o.status !== 'Cancelled').reduce((sum: number, o: any) => sum + (o.totalPrice || 0), 0);
-        const paidCount = orders.filter((o: any) => o.status === 'Paid' || o.status === 'Delivered').length;
-        const pendingCount = orders.filter((o: any) => o.status === 'Pending').length;
+        // --- CALCULATE KPI ---
+        // Real Money Flow: Paid, Processing, Shipped, Delivered
+        // Unpaid/Pending: Pending, Cancelled (Cancelled is technicaly unpaid)
+        const paidStatuses = ['Paid', 'Processing', 'Shipped', 'Delivered'];
+        
+        const totalRev = orders.filter((o: any) => paidStatuses.includes(o.status)).reduce((sum: number, o: any) => sum + (o.totalPrice || 0), 0);
+        
+        const paidCount = orders.filter((o: any) => paidStatuses.includes(o.status)).length;
+        const unpaidCount = orders.length - paidCount; // Everything else (Pending, Cancelled)
+
+        // Calculate dynamic trend (this month vs last month) - Real Revenue
+        const trendNow = new Date();
+        const thisMonth = trendNow.getMonth();
+        const thisYear = trendNow.getFullYear();
+        const lastMonth = thisMonth === 0 ? 11 : thisMonth - 1;
+        const lastMonthYear = thisMonth === 0 ? thisYear - 1 : thisYear;
+
+        const thisMonthRev = orders.filter((o: any) => {
+          const d = new Date(o.createdAt);
+          return d.getMonth() === thisMonth && d.getFullYear() === thisYear && paidStatuses.includes(o.status);
+        }).reduce((sum: number, o: any) => sum + (o.totalPrice || 0), 0);
+
+        const lastMonthRev = orders.filter((o: any) => {
+          const d = new Date(o.createdAt);
+          return d.getMonth() === lastMonth && d.getFullYear() === lastMonthYear && paidStatuses.includes(o.status);
+        }).reduce((sum: number, o: any) => sum + (o.totalPrice || 0), 0);
+
+        // Calculate percentage change (avoid division by zero)
+        let trend = 0;
+        if (lastMonthRev > 0) {
+          trend = ((thisMonthRev - lastMonthRev) / lastMonthRev) * 100;
+        } else if (thisMonthRev > 0) {
+          trend = 100; // 100% growth from zero
+        }
 
         stats.value = {
           revenue: totalRev,
@@ -338,41 +461,94 @@ export default defineComponent({
           customers: users.length,
           newCustomers: users.filter((u: any) => new Date(u.createdAt).toDateString() === new Date().toDateString()).length,
           lowStock: products.filter((p: any) => p.stockQuantity < 5).length,
-          pendingOrders: pendingCount,
+          pendingOrders: unpaidCount, // Renaming logically to Unpaid/Pending
           paidPercent: orders.length ? Math.round((paidCount / orders.length) * 100) : 0,
-          pendingPercent: orders.length ? Math.round((pendingCount / orders.length) * 100) : 0,
-          trend: 12.5 // Mock trend for now (needs historical data to calculate real)
+          pendingPercent: orders.length ? Math.round((unpaidCount / orders.length) * 100) : 0,
+          trend: Math.round(trend * 10) / 10 // Round to 1 decimal place
         };
 
-        // --- CALCULATE REVENUE GRAPH (Monthly) ---
+        // Store orders and promos for chart calculations
+        allOrders.value = orders;
+        allPromos.value = promos;
+
+        // --- CALCULATE REVENUE GRAPH (Monthly - default) ---
+        // Only include Real Money orders
         const currentYear = new Date().getFullYear();
+        const currentMonth = new Date().getMonth();
         const monthlyRev = new Array(12).fill(0);
 
         orders.forEach((o: any) => {
           const d = new Date(o.createdAt);
-          if (d.getFullYear() === currentYear && o.status !== 'Cancelled') {
+          if (d.getFullYear() === currentYear && paidStatuses.includes(o.status)) {
             monthlyRev[d.getMonth()] += (o.totalPrice || 0);
           }
         });
         revenueSeries.value = monthlyRev;
 
+        // --- CALCULATE DAILY REVENUE (Last 7 days) ---
+        // Only include Real Money orders
+        const today = new Date();
+        const dailyRev = new Array(7).fill(0);
+        for (let i = 0; i < 7; i++) {
+          const targetDate = new Date(today);
+          targetDate.setDate(today.getDate() - (6 - i));
+          const dateStr = targetDate.toDateString();
+          orders.forEach((o: any) => {
+            if (new Date(o.createdAt).toDateString() === dateStr && paidStatuses.includes(o.status)) {
+              dailyRev[i] += (o.totalPrice || 0);
+            }
+          });
+        }
+        dailyRevenue.value = dailyRev;
+
+        // --- CALCULATE WEEKLY REVENUE (Last 8 weeks) ---
+        const weeklyRev = new Array(8).fill(0);
+        for (let i = 0; i < 8; i++) {
+          const weekStart = new Date(today);
+          weekStart.setDate(today.getDate() - (7 - i) * 7);
+          const weekEnd = new Date(weekStart);
+          weekEnd.setDate(weekStart.getDate() + 7);
+          orders.forEach((o: any) => {
+            const orderDate = new Date(o.createdAt);
+            if (orderDate >= weekStart && orderDate < weekEnd && paidStatuses.includes(o.status)) {
+              weeklyRev[i] += (o.totalPrice || 0);
+            }
+          });
+        }
+        weeklyRevenue.value = weeklyRev;
+
+        // --- CALCULATE YEARLY REVENUE (Last 5 years) ---
+        // Only include Real Money orders
+        const yearlyRev = new Array(5).fill(0);
+        for (let i = 0; i < 5; i++) {
+          const year = currentYear - (4 - i);
+          orders.forEach((o: any) => {
+            const orderDate = new Date(o.createdAt);
+            if (orderDate.getFullYear() === year && paidStatuses.includes(o.status)) {
+              yearlyRev[i] += (o.totalPrice || 0);
+            }
+          });
+        }
+        yearlyRevenue.value = yearlyRev;
+
         // --- CALCULATE TOP PRODUCTS ---
-        // Aggregate all orderItems
         const itemMap: Record<string, number> = {};
         orders.forEach((o: any) => {
-          if (o.orderItems && Array.isArray(o.orderItems)) {
-            o.orderItems.forEach((item: any) => {
-              // Use 'quantity' (the actual field name) with fallback to 'qty'
-              const qty = item.quantity || item.qty || 0;
-              itemMap[item.name] = (itemMap[item.name] || 0) + qty;
-            });
+          // Count sold items only for Real Money orders? Or all?
+          // Usually "Top Selling" implies sold & paid.
+          if (paidStatuses.includes(o.status)) {
+            if (o.orderItems && Array.isArray(o.orderItems)) {
+              o.orderItems.forEach((item: any) => {
+                const qty = item.quantity || item.qty || 0;
+                itemMap[item.name] = (itemMap[item.name] || 0) + qty;
+              });
+            }
           }
         });
 
-        // Convert to array, sort, take top 5 - ONLY include items with qty > 0
         const sortedItems = Object.entries(itemMap)
           .map(([name, qty]) => ({ name, qty }))
-          .filter(item => item.qty > 0)  // Only show products that have been sold
+          .filter(item => item.qty > 0)
           .sort((a, b) => b.qty - a.qty)
           .slice(0, 5);
 
@@ -386,14 +562,31 @@ export default defineComponent({
         recentOrders.value = orders.slice(0, 5);
 
         // --- CALCULATE PROMO STATS ---
+        // (Keeping existing promo logic but could refine to paid only if needed)
+        // ... (Existing logic below is block-replaced, need to include it or cut off here)
+        // Wait, I must provide *complete* replacement for the chunk or valid context.
+        // My EndLine is 608 (finally block).
+        // I need to be careful not to delete Promo Stats logic.
+        // I will copy the Promo Stats logic from the previous view (Lines 546-602).
+        
         const now = new Date();
         const activePromos = promos.filter((p: any) => 
           new Date(p.startDate) <= now && new Date(p.endDate) >= now
         );
-        
-        const totalRedemptions = promos.reduce((sum: number, p: any) => sum + (p.usageCount || 0), 0);
-        const avgOrderValue = 50; // Estimate
-        const estSavings = promos.reduce((sum: number, p: any) => {
+
+        const ordersWithDiscount = orders.filter((o: any) => 
+          (o.discountAmount && o.discountAmount > 0) || o.promoCode
+        );
+
+        const apiRedemptions = promos.reduce((sum: number, p: any) => sum + (p.usageCount || 0), 0);
+        const totalRedemptions = Math.max(ordersWithDiscount.length, apiRedemptions);
+
+        const estSavingsFromOrders = orders.reduce((sum: number, o: any) => {
+          return sum + (o.discountAmount || 0);
+        }, 0);
+
+        const avgOrderValue = stats.value.orders > 0 ? stats.value.revenue / stats.value.orders : 50;
+        const estSavingsFromPromos = promos.reduce((sum: number, p: any) => {
           const uses = p.usageCount || 0;
           if (p.type === 'percent') {
             return sum + (p.value / 100) * avgOrderValue * uses;
@@ -404,12 +597,23 @@ export default defineComponent({
         promoStats.value = {
           active: activePromos.length,
           totalRedemptions,
-          estimatedSavings: estSavings
+          estimatedSavings: Math.max(estSavingsFromOrders, estSavingsFromPromos)
         };
 
-        // Top performing promos (by usage count) - ONLY include promos with usageCount > 0
-        topPromos.value = [...promos]
-          .filter((p: any) => (p.usageCount || 0) > 0)  // Only show promos that have been used
+        const promoUsageMap: Record<string, number> = {};
+        orders.forEach((o: any) => {
+          if (o.promoCode) {
+            promoUsageMap[o.promoCode.toUpperCase()] = (promoUsageMap[o.promoCode.toUpperCase()] || 0) + 1;
+          }
+        });
+
+        const promosWithUsage = promos.map((p: any) => ({
+          ...p,
+          usageCount: Math.max(p.usageCount || 0, promoUsageMap[p.code?.toUpperCase()] || 0)
+        }));
+
+        topPromos.value = promosWithUsage
+          .filter((p: any) => (p.usageCount || 0) > 0)
           .sort((a: any, b: any) => (b.usageCount || 0) - (a.usageCount || 0))
           .slice(0, 3);
 
@@ -420,26 +624,152 @@ export default defineComponent({
       }
     };
 
-    // SVG Graph Math
+    // Dynamic chart data based on selected mode
+    // Data is limited to current date (no future data shown, but padded to match label count)
+    const currentRevenueSeries = computed(() => {
+      const today = new Date();
+      const currentMonth = today.getMonth();
+      
+      switch (chartMode.value) {
+        case 'daily': 
+          return dailyRevenue.value; // Already shows last 7 days
+        case 'yearly': 
+          return yearlyRevenue.value; // 5 years
+        case 'monthly':
+        default: 
+          // Only show up to current month (slice from Jan to current month inclusive)
+          // Future months will be empty in the series, so no line is drawn
+          const sliced = revenueSeries.value.slice(0, currentMonth + 1);
+          return sliced;
+      }
+    });
+
+    // Dynamic chart labels based on selected mode
+    // Always show full label set (12 months, 7 days, 5 years)
+    const chartLabels = computed(() => {
+      const today = new Date();
+      const allMonths = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      
+      switch (chartMode.value) {
+        case 'daily':
+          // Last 7 days
+          return Array.from({ length: 7 }, (_, i) => {
+            const d = new Date(today);
+            d.setDate(today.getDate() - (6 - i));
+            return d.toLocaleDateString('en-US', { weekday: 'short' });
+          });
+        case 'yearly':
+          // Last 5 years (up to and including current year)
+          const currentYear = today.getFullYear();
+          return Array.from({ length: 5 }, (_, i) => String(currentYear - (4 - i)));
+        case 'monthly':
+        default:
+          // Always show all 12 months
+          return allMonths;
+      }
+    });
+
+    // Chart max value for Y-axis labels - MUST be defined before points!
+    const chartMaxValue = computed(() => {
+      const max = Math.max(...currentRevenueSeries.value, 100);
+      // Round up to nice number for display
+      const magnitude = Math.pow(10, Math.floor(Math.log10(max)));
+      return Math.ceil(max / magnitude) * magnitude;
+    });
+
+    // SVG Graph Math - uses currentRevenueSeries for dynamic data
+    // Chart scales from 0 to chartMaxValue for proper Y-axis alignment
+    // Uses numeric values (0-100) to match SVG viewBox="0 0 100 100"
     const points = computed(() => {
-      const max = Math.max(...revenueSeries.value, 100); // Minimum scale
-      return revenueSeries.value.map((val, i) => ({
-        x: (i / (11)) * 100 + "%",
-        y: 100 - (val / max) * 100 + "%"
+      const series = currentRevenueSeries.value;
+      const max = chartMaxValue.value; // Use chartMaxValue for consistent scaling with Y-axis
+      const count = chartLabels.value.length;
+      const slotWidth = 100 / count;
+      
+      return series.map((val, i) => ({
+        x: (i * slotWidth) + (slotWidth / 2),  // Center in slot
+        y: 100 - (val / max) * 100  // 100 = bottom ($0), 0 = top (max)
       }));
     });
 
     const linePath = computed(() => {
-        const max = Math.max(...revenueSeries.value, 100);
-        const data = revenueSeries.value.map((val, i) => {
-            const x = (i / 11) * 100;
-            const y = 100 - (val / max) * 100;
-            return `${x},${y}`;
-        });
-        return `M ${data.join(" L ")}`;
+      const series = currentRevenueSeries.value;
+      const max = chartMaxValue.value; // Use chartMaxValue for consistent scaling
+      const count = chartLabels.value.length;
+      const slotWidth = 100 / count;
+      
+      const data = series.map((val, i) => {
+        const x = (i * slotWidth) + (slotWidth / 2);
+        const y = 100 - (val / max) * 100;
+        return `${x},${y}`;
+      });
+
+      if (data.length === 0) return '';
+      
+      // Anchor to bottom-left (0,100) to ensure line is visible even for single point
+      return `M 0,100 L ${data.join(" L ")}`;
     });
 
-    const areaPath = computed(() => `${linePath.value} L 100,100 L 0,100 Z`);
+    const areaPath = computed(() => {
+      const series = currentRevenueSeries.value;
+      const data = points.value;
+      if (!data.length) return "";
+      const last = data[data.length - 1];
+      // Close the area: Start 0,100 -> LinePath (which starts 0,100) -> LastPoint -> LastPointX,100 -> Close
+      // Since linePath already starts with M 0,100, we just append the close
+      return `${linePath.value} L ${last.x},100 Z`;
+    });
+
+    // Detect peaks and valleys (trend change points)
+    const peakValleyIndices = computed(() => {
+      const series = currentRevenueSeries.value;
+      const indices: number[] = [];
+      
+      // Always include first and last points
+      if (series.length > 0) indices.push(0);
+      
+      // Find peaks and valleys
+      for (let i = 1; i < series.length - 1; i++) {
+        const prev = series[i - 1];
+        const curr = series[i];
+        const next = series[i + 1];
+        
+        // Peak: current is higher than both neighbors
+        // Valley: current is lower than both neighbors
+        if ((curr > prev && curr > next) || (curr < prev && curr < next)) {
+          indices.push(i);
+        }
+      }
+      
+      // Always include last point if series has items
+      if (series.length > 1) indices.push(series.length - 1);
+      
+      return indices;
+    });
+
+    // Detect peaks and valleys (trend change points)
+
+    // Format chart Y-axis values (compact format)
+    const formatChartValue = (n: number) => {
+      if (n >= 1000000) return `$${(n / 1000000).toFixed(1)}M`;
+      if (n >= 1000) return `$${(n / 1000).toFixed(1)}K`;
+      return `$${n.toFixed(0)}`;
+    };
+
+    // Handle chart hover for tooltip
+    const handleChartHover = (event: MouseEvent) => {
+      const target = event.currentTarget as HTMLElement;
+      const rect = target.getBoundingClientRect();
+      const x = event.clientX - rect.left;
+      const percentage = x / rect.width;
+      
+      // Calculate index based on equal slots
+      const count = chartLabels.value.length;
+      const index = Math.floor(percentage * count);
+      
+      // Allow hovering valid label indices
+      chartHoverIndex.value = Math.max(0, Math.min(index, count - 1));
+    };
 
     // Helpers
     const formatMoney = (n: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(n);
@@ -462,7 +792,13 @@ export default defineComponent({
       isLoading, stats, recentOrders, topProducts, loadData, revenueSeries,
       formatMoney, formatDate, statusClass, currentDate,
       points, linePath, areaPath,
-      promoStats, topPromos
+      promoStats, topPromos,
+      // Chart mode functionality
+      chartMode, currentRevenueSeries, chartLabels,
+      dailyRevenue, yearlyRevenue,
+      // Chart hover and peak/valley functionality
+      chartHoverIndex, chartMaxValue, formatChartValue, handleChartHover,
+      peakValleyIndices
     };
   }
 });

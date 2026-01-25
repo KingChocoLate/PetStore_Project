@@ -511,9 +511,15 @@ export default defineComponent({
     stats() {
       const pending = this.orders.filter(o => o.status === 'Pending').length;
       const delivered = this.orders.filter(o => o.status === 'Delivered').length;
+      
+      // Real Money Flow: Paid, Processing, Shipped, Delivered
+      const paidStatuses = ['Paid', 'Processing', 'Shipped', 'Delivered'];
+
       return {
         total: this.orders.length,
-        revenue: this.orders.reduce((s, o) => s + (o.total || 0), 0),
+        revenue: this.orders
+          .filter(o => paidStatuses.includes(o.status))
+          .reduce((s, o) => s + (o.total || 0), 0),
         paidCount: this.orders.filter(o => o.isPaid).length,
         unpaidCount: this.orders.filter(o => !o.isPaid).length,
         pending: pending,
