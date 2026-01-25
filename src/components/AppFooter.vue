@@ -33,9 +33,9 @@
             <h3 class="text-white font-bold text-base mb-4">Support</h3>
             <ul class="space-y-2 text-gray-400 text-sm">
               <li><router-link to="/contact" class="hover:text-[#009200] transition-colors">Contact Us</router-link></li>
-              <li><a href="#" class="hover:text-[#009200] transition-colors">FAQs</a></li>
-              <li><a href="#" class="hover:text-[#009200] transition-colors">Privacy Policy</a></li>
-              <li><a href="#" class="hover:text-[#009200] transition-colors">Terms & Conditions</a></li>
+              <li><router-link to="/faqs" class="hover:text-[#009200] transition-colors">FAQs</router-link></li>
+              <li><router-link to="/privacy-policy" class="hover:text-[#009200] transition-colors">Privacy Policy</router-link></li>
+              <li><router-link to="/terms-conditions" class="hover:text-[#009200] transition-colors">Terms & Conditions</router-link></li>
             </ul>
           </div>
         </div>

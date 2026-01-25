@@ -186,7 +186,7 @@
           <router-link
             v-for="rec in recommendedProducts"
             :key="rec._id"
-            :to="`/productDetail/${rec._id}`"
+            :to="{ name: 'product-detail', params: { id: rec._id } }"
             class="group bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm hover:shadow-xl hover:border-[#009200]/20 transition-all duration-300"
           >
             <div class="relative aspect-square bg-gray-50 p-4 overflow-hidden">
@@ -219,7 +219,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, onMounted, computed } from 'vue';
+import { defineComponent, ref, onMounted, computed, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useCartStore } from '@/stores/cart';
 import { useAuthStore } from '@/stores/auth';
@@ -287,12 +287,12 @@ export default defineComponent({
       try {
         const response = await api.get('/products');
         allProducts.value = response.data;
-        
+
         // Filter products by same category, exclude current product, limit to 4
         if (product.value) {
           recommendedProducts.value = allProducts.value
-            .filter((p: any) => 
-              p.category === product.value.category && 
+            .filter((p: any) =>
+              p.category === product.value.category &&
               p._id !== product.value._id
             )
             .slice(0, 4);
@@ -341,6 +341,17 @@ export default defineComponent({
     onMounted(() => {
         fetchProduct();
     });
+
+    // ⚡️ Fix for route changes not updating the component
+    watch(
+      () => route.params.id,
+      (newId) => {
+        if (newId) {
+          fetchProduct();
+        window.scrollTo(0, 0); // Scroll to top
+        }
+      }
+    );
 
     return {
       product, loading, error, mainImage, quantity, addToCart,

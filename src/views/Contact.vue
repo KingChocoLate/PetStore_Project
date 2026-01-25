@@ -92,14 +92,11 @@
         </div>
 
         <div class="w-full lg:w-1/2 h-[400px] lg:h-auto bg-gray-200 relative">
-          <iframe
-            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d62551.01837946979!2d104.8806296!3d11.5696196!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3109513dc76a6be3%3A0x9c010ee85ab525bb!2sPhnom%20Penh!5e0!3m2!1sen!2skh!4v1700000000000!5m2!1sen!2skh"
+          <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3908.741254292528!2d104.89550541157539!3d11.570397488583398!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3109517388680e15%3A0x63057e6682968f5!2sInstitute%20of%20Technology%20of%20Cambodia!5e0!3m2!1sen!2skh!4v1769353046619!5m2!1sen!2skh"
             class="w-full h-full border-none"
-            allowfullscreen
-            loading="lazy"
-            referrerpolicy="no-referrer-when-downgrade"
-          ></iframe>
-
+            allowfullscreen loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade">
+          </iframe>
           <div class="absolute bottom-6 left-6 bg-white p-4 rounded-xl shadow-lg max-w-[200px] hidden sm:block">
             <p class="text-xs font-bold text-gray-400 uppercase mb-1">Our Location</p>
             <p class="text-sm font-bold text-[#181818]">Phnom Penh, Cambodia</p>

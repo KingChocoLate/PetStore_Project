@@ -47,7 +47,10 @@ const router = createRouter({
         { path: 'shop', name: 'shop', component: Shop },
         { path: 'about', name: 'about', component: About },
         { path: 'contact', name: 'contact', component: Contact },
-        { path: 'productDetail/:id', name: 'product-detail', component: ProductDetail },
+        { path: 'product-detail/:id', name: 'product-detail', component: ProductDetail },
+        { path: 'faqs', name: 'faqs', component: () => import('@/views/FAQs.vue') },
+        { path: 'privacy-policy', name: 'privacy-policy', component: () => import('@/views/PrivacyPolicy.vue') },
+        { path: 'terms-conditions', name: 'terms-conditions', component: () => import('@/views/TermsConditions.vue') },
 
         // --- PROTECTED ROUTES ---
         { path: 'profile', name: 'profile', component: UserProfile, meta: { requiresAuth: true } },
