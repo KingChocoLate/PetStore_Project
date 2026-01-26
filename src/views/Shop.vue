@@ -117,10 +117,10 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, onMounted, computed, h } from 'vue'
+import { defineComponent, ref, onMounted, computed, h, watch } from 'vue' // Added watch
 import api from '../services/api'
 import ProductCard from '../components/ProductCard.vue'
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { useToast } from "vue-toastification";
 
 export default defineComponent({
@@ -128,19 +128,51 @@ export default defineComponent({
   components: { ProductCard },
   setup() {
     const route = useRoute();
+    const router = useRouter();
     const toast = useToast();
+
+    const topTabs = ['All', 'Cat', 'Dog', 'Small Pet', 'Bird', 'Fish'];
+    const categoryItems = ['All', 'Food', 'Toys', 'Furniture', 'Accessories', 'Treats'];
+    const sortItems = ['Default', 'Price: Low to High', 'Price: High to Low', 'Name: A-Z'];
 
     const showMobileFilters = ref(false);
     const products = ref<any[]>([]);
     const loading = ref(true);
     const error = ref('');
-    const activeTab = ref('All');
-    const selectedCategory = ref('All');
+    // Sync Category from URL (Species -> activeTab, Item Type -> selectedCategory)
+    const initCategory = (route.query.category as string) || '';
+    
+    // Helper to find matching tab (case-insensitive)
+    const findTab = (name: string) => topTabs.find(t => t.toLowerCase() === name.toLowerCase());
+    const findCat = (name: string) => categoryItems.find(c => c.toLowerCase() === name.toLowerCase());
+
+    const activeTab = ref(findTab(initCategory) || 'All');
+    const selectedCategory = ref(findCat(initCategory) || 'All');
     const selectedSort = ref('Default');
 
-    const topTabs = ['All', 'Cat', 'Dog', 'Small Pet', 'Bird', 'Fish'];
-    const categoryItems = ['All', 'Food', 'Toys', 'Furniture', 'Accessories', 'Treats'];
-    const sortItems = ['Default', 'Price: Low to High', 'Price: High to Low', 'Name: A-Z'];
+    watch(() => route.query.category, (newVal: any) => {
+      const val = newVal as string;
+      if (!val) {
+        activeTab.value = 'All';
+        selectedCategory.value = 'All';
+        return;
+      }
+
+      const matchedTab = findTab(val);
+      if (matchedTab) {
+        activeTab.value = matchedTab;
+        selectedCategory.value = 'All'; // Reset item filter if switching species
+      } else {
+        const matchedCat = findCat(val);
+        if (matchedCat) {
+          selectedCategory.value = matchedCat;
+          // Optional: Keep activeTab or reset? Usually reset to search broadly.
+          // activeTab.value = 'All'; 
+        }
+      }
+    });
+
+
 
     const fetchProducts = async () => {
       loading.value = true;
@@ -188,6 +220,8 @@ export default defineComponent({
       activeTab.value = 'All';
       selectedCategory.value = 'All';
       selectedSort.value = 'Default';
+      // Clear URL Query (Search)
+      router.replace({ query: {} });
     };
 
     onMounted(() => {

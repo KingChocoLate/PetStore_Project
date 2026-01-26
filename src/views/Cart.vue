@@ -82,7 +82,12 @@
                       <p class="text-xs text-gray-400 mb-0.5">Total</p>
                       <!-- Show strikethrough for discounted items -->
                       <div v-if="item.hasDiscount && item.originalPrice" class="flex flex-col items-end">
-                        <span class="text-xs text-gray-400 line-through">${{ (item.originalPrice * item.quantity).toFixed(2) }}</span>
+                        <div class="flex items-center gap-2 mb-1">
+                          <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-red-100 text-red-600">
+                             -{{ Math.round(((item.originalPrice - item.price) / item.originalPrice) * 100) }}%
+                          </span>
+                          <span class="text-xs text-gray-400 line-through">${{ (item.originalPrice * item.quantity).toFixed(2) }}</span>
+                        </div>
                         <p class="text-xl font-extrabold text-red-500">${{ (item.price * item.quantity).toFixed(2) }}</p>
                       </div>
                       <p v-else class="text-xl font-extrabold text-[#009200]">${{ (item.price * item.quantity).toFixed(2) }}</p>

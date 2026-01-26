@@ -78,7 +78,7 @@
     <section class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
       <div class="text-center mb-12">
         <h2 class="text-3xl md:text-4xl font-extrabold text-[#1a1a1a] mb-4">Shop By Category</h2>
-        <p class="text-gray-500">Find everything for your furry (or scaled) friend.</p>
+        <p class="text-gray-500">Find everything for your furry, feathered, or scaled friends.</p>
       </div>
 
       <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-8">
@@ -204,7 +204,7 @@ export default defineComponent({
     const petCategory = [
       { img: petImg1, name: 'Cat' },
       { img: petImg2, name: 'Dog' },
-      { img: petImg3, name: 'Small pet' },
+      { img: petImg3, name: 'Small Pet' },
       { img: petImg4, name: 'Bird' },
       { img: petImg5, name: 'Fish' },
     ]

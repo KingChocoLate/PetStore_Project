@@ -418,10 +418,10 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from 'vue'
+import { defineComponent, ref, watch } from 'vue'
 import { useCartStore } from '@/stores/cart'
 import { useAuthStore } from '@/stores/auth' // 1. Import Auth Store
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 
 export default defineComponent({
   name: 'Navigation',
@@ -429,6 +429,7 @@ export default defineComponent({
     const cartStore = useCartStore()
     const authStore = useAuthStore() // 2. Initialize Auth Store
     const router = useRouter()
+    const route = useRoute()
 
     const searchQuery = ref('')
     const isSearchOpen = ref(false)
@@ -443,6 +444,27 @@ export default defineComponent({
       { name: 'About', path: '/about' },
       { name: 'Contact', path: '/contact' },
     ]
+
+    // Debounce Helper
+    const debounce = (fn: (...args: any[]) => void, delay: number) => {
+      let timeoutId: ReturnType<typeof setTimeout>
+      return (...args: any[]) => {
+        clearTimeout(timeoutId)
+        timeoutId = setTimeout(() => fn(...args), delay)
+      }
+    }
+
+    // Real-Time Search Logic
+    const performRealTimeSearch = debounce((query: string) => {
+      // ONLY update if we are already on the Shop page
+      if (route.name === 'shop') {
+        router.replace({ name: 'shop', query: { ...route.query, q: query } })
+      }
+    }, 300)
+
+    watch(searchQuery, (newVal) => {
+      performRealTimeSearch(newVal)
+    })
 
     const toggleSearch = () => {
       isSearchOpen.value = !isSearchOpen.value
@@ -462,6 +484,7 @@ export default defineComponent({
     }
 
     const handleSearch = () => {
+      // Triggered by ENTER key (works everywhere)
       if (searchQuery.value.trim()) {
         router.push({ name: 'shop', query: { q: searchQuery.value } })
         isSearchOpen.value = false

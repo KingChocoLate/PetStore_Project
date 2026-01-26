@@ -22,14 +22,21 @@ export const useCartStore = defineStore('cart', {
 
       if (existingItem) {
         existingItem.quantity++;
+        // Update price info in case it changed (e.g. discount applied)
+        // Round to 2 decimals to ensure Total = Sum(Components)
+        existingItem.price = Number(Number(product.price).toFixed(2));
+        existingItem.originalPrice = product.originalPrice;
+        existingItem.hasDiscount = product.hasDiscount;
       } else {
         this.items.push({
           _id: product._id,
           name: product.name,
-          price: Number(product.price),
-          image: product.imageUrl || product.image, // Handle backend vs frontend naming
+          price: Number(Number(product.price).toFixed(2)),
+          image: product.imageUrl || product.image,
           category: product.category,
           quantity: 1,
+          originalPrice: product.originalPrice,
+          hasDiscount: product.hasDiscount,
         });
       }
       this.saveToLocalStorage();
