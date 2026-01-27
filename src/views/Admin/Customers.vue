@@ -222,7 +222,7 @@
                 placeholder="Add notes about this customer..."
                 class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition resize-none"
               ></textarea>
-              <p class="text-xs text-slate-400">Notes are saved locally in your browser.</p>
+
             </div>
 
           </div>
