@@ -54,7 +54,7 @@
               </router-link>
 
               <!-- Pending Payments -->
-              <router-link v-if="notifications.pendingPayments > 0" to="/admin/orders" @click="notifOpen = false" class="flex items-center gap-3 px-4 py-3 hover:bg-slate-50 transition cursor-pointer">
+              <router-link v-if="notifications.pendingPayments > 0" to="/admin/orders?payment=unpaid" @click="notifOpen = false" class="flex items-center gap-3 px-4 py-3 hover:bg-slate-50 transition cursor-pointer">
                 <div class="w-9 h-9 bg-amber-100 text-amber-600 rounded-xl flex items-center justify-center flex-shrink-0">
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                 </div>
@@ -78,7 +78,7 @@
               </router-link>
 
               <!-- Low Stock -->
-              <router-link v-if="notifications.lowStock > 0" to="/admin/products" @click="notifOpen = false" class="flex items-center gap-3 px-4 py-3 hover:bg-slate-50 transition cursor-pointer">
+              <router-link v-if="notifications.lowStock > 0" to="/admin/products?filter=low_stock" @click="notifOpen = false" class="flex items-center gap-3 px-4 py-3 hover:bg-slate-50 transition cursor-pointer">
                 <div class="w-9 h-9 bg-rose-100 text-rose-600 rounded-xl flex items-center justify-center flex-shrink-0">
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
                 </div>

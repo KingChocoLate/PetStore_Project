@@ -465,7 +465,7 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import axios from "axios";
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
 import { jsPDF } from 'jspdf';
 import ConfirmModal from '@/components/Admin/ConfirmModal.vue';
@@ -529,8 +529,9 @@ export default defineComponent({
   },
   setup() {
     const router = useRouter();
+    const route = useRoute();
     const authStore = useAuthStore();
-    return { router, authStore };
+    return { router, route, authStore };
   },
   computed: {
     statusTabs() {
@@ -587,6 +588,20 @@ export default defineComponent({
   },
   mounted() {
     this.fetchOrders();
+    // Handle Deep Linking
+    if (this.route.query.payment === 'unpaid') {
+      this.activePaymentFilter = 'unpaid';
+    } else if (this.route.query.payment === 'paid') {
+      this.activePaymentFilter = 'paid';
+    }
+
+    if (this.route.query.status) {
+      // Validate status to ensure it's one of the tabs
+      const validStatuses = ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled'];
+      if (validStatuses.includes(this.route.query.status as string)) {
+        this.activeStatus = this.route.query.status as string;
+      }
+    }
   },
   methods: {
     getAuthHeader() {
