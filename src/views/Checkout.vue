@@ -309,6 +309,7 @@ export default defineComponent({
             try {
                 const res = await api.get(`/orders/${orderId}/payment`);
                 if (res.data.paid) {
+                    if (orderSuccess.value) return; // Prevent duplicate success triggers
                     clearIntervals();
                     showBakongModal.value = false;
                     cartStore.clearCart();
