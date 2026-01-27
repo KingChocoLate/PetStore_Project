@@ -813,8 +813,13 @@ export default defineComponent({
           if (o.promoCode) {
             const code = o.promoCode.toUpperCase();
             promoUsageMap[code] = (promoUsageMap[code] || 0) + 1;
-            promoRevenueMap[code] = (promoRevenueMap[code] || 0) + (o.totalPrice || 0); // Add revenue
-            totalPromoRevenue += (o.totalPrice || 0);
+            
+            // Fix: Use Pure Revenue (Items - Discount) to match Backend Logic
+            // Fallback: If itemsPrice missing, use totalPrice (but backend usually provides itemsPrice)
+            const pureRevenue = (o.itemsPrice || o.totalPrice) - (o.discountAmount || 0);
+            
+            promoRevenueMap[code] = (promoRevenueMap[code] || 0) + pureRevenue; 
+            totalPromoRevenue += pureRevenue;
           }
         });
 
@@ -828,7 +833,8 @@ export default defineComponent({
         const promosWithUsage = promos.map((p: any) => ({
           ...p,
           usageCount: Math.max(p.usageCount || 0, promoUsageMap[p.code?.toUpperCase()] || 0),
-          revenue: promoRevenueMap[p.code?.toUpperCase()] || 0 // New Metric per promo
+          // Fix: Use Math.max to preserve DB revenue for automatic campaigns (which have no promoCode on order)
+          revenue: Math.max(p.revenue || 0, promoRevenueMap[p.code?.toUpperCase()] || 0)
         }));
 
         topPromos.value = promosWithUsage
