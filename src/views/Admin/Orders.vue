@@ -208,7 +208,8 @@
                         :value="o.status"
                         @change="updateStatus(o, $event)"
                         class="appearance-none pl-3 pr-7 py-1.5 rounded-lg text-xs font-bold border outline-none cursor-pointer transition-colors focus:ring-2 focus:ring-offset-1 focus:ring-slate-200"
-                        :class="statusPill(o.status)"
+                        :class="[statusPill(o.status), { 'opacity-50 cursor-not-allowed': (!o.isPaid && o.status === 'Pending' && !['Cash', 'COD'].includes(o.paymentMethod)) }]"
+                        :disabled="!o.isPaid && o.status === 'Pending' && !['Cash', 'COD'].includes(o.paymentMethod)"
                       >
                          <option value="Pending">Pending</option>
                          <option value="Processing">Processing</option>
@@ -349,7 +350,7 @@
                     </div>
                     <button
                       v-if="!selected.isPaid"
-                      @click="markAsPaid(selected)"
+                      @click="triggerMarkPaid(selected)"
                       class="px-4 py-3 bg-emerald-600 text-white rounded-xl text-xs font-bold hover:bg-emerald-700 transition"
                     >
                       Mark Paid
@@ -504,6 +505,8 @@ export default defineComponent({
       showCancelConfirm: false,
       pendingCancelOrder: null as OrderRow | null,
       pendingCancelEvent: null as any,
+      showMarkPaidConfirm: false,
+      pendingPaidOrder: null as OrderRow | null,
       activePaymentFilter: 'all' as 'all' | 'paid' | 'unpaid',
       showExportMenu: false,
       showReportMenu: false,
@@ -750,7 +753,21 @@ export default defineComponent({
       }
     },
 
-    async markAsPaid(order: OrderRow) {
+    cancelMarkPaidConfirm() {
+      this.showMarkPaidConfirm = false;
+      this.pendingPaidOrder = null;
+    },
+
+    triggerMarkPaid(order: OrderRow) {
+      this.pendingPaidOrder = order;
+      this.showMarkPaidConfirm = true;
+    },
+
+    async confirmMarkPaid() {
+      if (!this.pendingPaidOrder) return;
+      
+      const order = this.pendingPaidOrder;
+
       try {
         await axios.put(`${API_BASE}/orders/${order.id}/pay`, {}, this.getAuthHeader());
         order.isPaid = true;
@@ -765,6 +782,8 @@ export default defineComponent({
       } catch (error) {
         console.error(error);
         this.showToast("Failed to update payment status.");
+      } finally {
+        this.cancelMarkPaidConfirm();
       }
     },
 

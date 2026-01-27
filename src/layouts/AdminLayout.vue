@@ -51,10 +51,11 @@ export default defineComponent({
     // 2. Dynamic Title
     const pageTitle = computed(() => {
       const path = route.path;
-      if (path.includes("dashboard")) return "Overview";
+      if (path.includes("dashboard")) return "Dashboard";
       if (path.includes("products")) return "Inventory";
       if (path.includes("orders")) return "Orders";
       if (path.includes("customers")) return "Customers";
+      if (path.includes("promotions")) return "Promotions";
       return "Admin";
     });
 

@@ -54,7 +54,10 @@
     </transition>
 
     <div v-if="orderSuccess" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 transition-opacity">
-      <div class="bg-white rounded-3xl p-10 max-w-md w-full text-center shadow-2xl transform scale-100 transition-transform">
+      <div class="bg-white rounded-3xl p-10 max-w-md w-full text-center shadow-2xl transform scale-100 transition-transform relative">
+        <button @click="closeSuccessModal" class="absolute top-4 right-4 p-2 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 transition">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
         <div class="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner">
           <svg class="w-12 h-12 text-[#009200]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
         </div>
@@ -424,10 +427,11 @@ export default defineComponent({
     };
 
     const goToHistory = () => router.push('/order-history');
+    const closeSuccessModal = () => { orderSuccess.value = false; };
 
     return {
       cartStore, form, isProcessing, orderSuccess,
-      shippingCost, totalCost, handleCheckout, setPaymentMethod, goToHistory,
+      shippingCost, totalCost, handleCheckout, setPaymentMethod, goToHistory, closeSuccessModal,
       showBakongModal, dynamicQR, closeBakongModal, timeLeft, formatTime, 
       showPayLaterConfirm, confirmPayLater
     };
