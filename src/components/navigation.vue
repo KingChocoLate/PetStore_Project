@@ -113,17 +113,27 @@
             class="relative group p-1.5 sm:p-2 text-gray-700 hover:text-[#009200] transition-colors"
             title="My Wishlist"
           >
-            <svg
-              class="w-5 h-5 sm:w-5.5 sm:h-5.5 md:w-6 md:h-6 transition-transform duration-300 group-hover:-translate-y-1"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-            >
-              <path
-                d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"
-              ></path>
-            </svg>
+            <div class="relative">
+              <svg
+                class="w-5 h-5 sm:w-5.5 sm:h-5.5 md:w-6 md:h-6 transition-transform duration-300 group-hover:-translate-y-1"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path
+                  d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"
+                ></path>
+              </svg>
+              <transition name="bounce">
+                <span
+                  v-if="wishlistStore.totalItems > 0"
+                  class="absolute -top-0.5 sm:-top-1 -right-0.5 sm:-right-1 bg-[#E63946] text-white text-[9px] sm:text-[10px] font-bold h-3.5 w-3.5 sm:h-4 sm:w-4 rounded-full flex items-center justify-center ring-1 sm:ring-2 ring-white shadow-sm"
+                >
+                  {{ wishlistStore.totalItems }}
+                </span>
+              </transition>
+            </div>
           </RouterLink>
 
           <RouterLink
@@ -428,6 +438,7 @@
 <script lang="ts">
 import { defineComponent, ref, watch } from 'vue'
 import { useCartStore } from '@/stores/cart'
+import { useWishlistStore } from '@/stores/wishlist' // Import Wishlist Store
 import { useAuthStore } from '@/stores/auth' // 1. Import Auth Store
 import { useRouter, useRoute } from 'vue-router'
 
@@ -435,7 +446,8 @@ export default defineComponent({
   name: 'Navigation',
   setup() {
     const cartStore = useCartStore()
-    const authStore = useAuthStore() // 2. Initialize Auth Store
+    const wishlistStore = useWishlistStore() // 2. Initialize Wishlist Store
+    const authStore = useAuthStore()
     const router = useRouter()
     const route = useRoute()
 
@@ -524,6 +536,7 @@ export default defineComponent({
 
     return {
       cartStore,
+      wishlistStore, // Return wishlistStore
       authStore, // 3. Return authStore so template can check isAuthenticated
       searchQuery,
       isSearchOpen,

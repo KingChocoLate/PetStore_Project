@@ -86,6 +86,8 @@ import { defineComponent, computed, onMounted } from 'vue';
 import { useCartStore } from '@/stores/cart';
 import { useWishlistStore } from '@/stores/wishlist';
 import { useDiscountStore } from '@/stores/discount';
+import { useAuthStore } from '@/stores/auth';
+import { useRouter } from 'vue-router';
 
 const BACKEND_URL = "https://petstore-backend-api.onrender.com";
 
@@ -101,6 +103,8 @@ export default defineComponent({
     const cartStore = useCartStore();
     const wishlistStore = useWishlistStore();
     const discountStore = useDiscountStore();
+    const authStore = useAuthStore();
+    const router = useRouter();
 
     // Fetch discounts if not loaded
     onMounted(() => {
@@ -148,6 +152,12 @@ export default defineComponent({
     });
 
     const addToCart = () => {
+      // Check if user is authenticated
+      if (!authStore.isAuthenticated) {
+        router.push('/login');
+        return;
+      }
+
       // Pass the discounted price if applicable
       const finalPrice = hasProductDiscount.value
         ? discountStore.getDiscountedPrice(props.product._id, props.product.price)
@@ -163,7 +173,10 @@ export default defineComponent({
     };
 
     const toggleWishlist = () => {
-      wishlistStore.toggleWishlist(props.product);
+      wishlistStore.toggleWishlist({
+        ...props.product,
+        image: resolvedImage.value // Force use of the resolved URL
+      });
     };
 
     return {

@@ -2,8 +2,8 @@
   <div class="min-h-screen bg-gray-50 font-sans text-gray-900">
     <div class="max-w-[1600px] mx-auto px-4 md:px-8 py-8">
 
-      <div class="sticky top-0 z-30 bg-gray-50/95 backdrop-blur-md py-4 mb-6 border-b border-gray-200">
-        <div class="flex items-center justify-between md:justify-start gap-4 overflow-x-auto pb-2 scrollbar-hide">
+      <div class="sticky top-0 z-30 bg-gray-50/95 backdrop-blur-md py-4 mb-6 border-b border-gray-200 flex items-center justify-between gap-4">
+        <div class="flex items-center justify-between md:justify-start gap-4 overflow-x-auto pb-2 scrollbar-hide flex-1">
           <button
             v-for="tab in topTabs"
             :key="tab"
@@ -16,6 +16,15 @@
             {{ tab }}
           </button>
         </div>
+
+        <button
+          v-if="hasActiveFilters"
+          @click="resetFilters"
+          class="hidden md:flex items-center gap-2 px-4 py-2 bg-red-50 text-red-500 rounded-full text-sm font-bold hover:bg-red-100 transition-colors whitespace-nowrap"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+          Clear Filters
+        </button>
       </div>
 
       <div class="flex flex-col lg:flex-row gap-8 relative">
@@ -227,11 +236,19 @@ export default defineComponent({
       return result;
     });
 
+    const hasActiveFilters = computed(() => {
+      const hasQuery = Object.keys(route.query).length > 0;
+      return activeTab.value !== 'All' || 
+             selectedCategory.value !== 'All' || 
+             selectedSort.value !== 'Default' || 
+             hasQuery;
+    });
+
     const resetFilters = () => {
       activeTab.value = 'All';
       selectedCategory.value = 'All';
       selectedSort.value = 'Default';
-      // Clear URL Query (Search)
+      // Clear URL Query (Search, Products, Category etc.)
       router.replace({ query: {} });
     };
 
@@ -241,7 +258,8 @@ export default defineComponent({
 
     return {
       products, loading, error, topTabs, categoryItems, sortItems,
-      activeTab, selectedCategory, selectedSort, filteredProducts, resetFilters, showMobileFilters
+      activeTab, selectedCategory, selectedSort, filteredProducts, resetFilters, showMobileFilters,
+      hasActiveFilters
     };
   }
 })

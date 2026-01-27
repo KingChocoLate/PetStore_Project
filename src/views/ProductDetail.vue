@@ -325,6 +325,12 @@ export default defineComponent({
     };
 
     const addToCart = () => {
+      // Check if user is authenticated
+      if (!authStore.isAuthenticated) {
+        router.push('/login');
+        return;
+      }
+
       if (!product.value) return;
       for (let i = 0; i < quantity.value; i++) {
         cartStore.addToCart({

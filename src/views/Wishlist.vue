@@ -89,6 +89,8 @@ import { defineComponent, onMounted } from 'vue';
 import { useWishlistStore } from '@/stores/wishlist';
 import { useCartStore } from '@/stores/cart';
 import { useDiscountStore } from '@/stores/discount';
+import { useAuthStore } from '@/stores/auth';
+import { useRouter } from 'vue-router';
 import { useToast } from "vue-toastification";
 
 export default defineComponent({
@@ -97,6 +99,8 @@ export default defineComponent({
     const wishlistStore = useWishlistStore();
     const cartStore = useCartStore();
     const discountStore = useDiscountStore();
+    const authStore = useAuthStore();
+    const router = useRouter();
     const toast = useToast();
 
     // Fetch discounts on mount
@@ -113,6 +117,12 @@ export default defineComponent({
       discountStore.getDiscountedPrice(productId, originalPrice);
 
     const moveToCart = (item: any) => {
+      // Check if user is authenticated
+      if (!authStore.isAuthenticated) {
+        router.push('/login');
+        return;
+      }
+
       // Calculate final price with discount if applicable
       const finalPrice = hasDiscount(item._id) 
         ? getDiscountedPrice(item._id, item.price) 
