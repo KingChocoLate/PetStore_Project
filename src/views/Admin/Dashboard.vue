@@ -777,6 +777,9 @@ export default defineComponent({
 
         const avgOrderValue = stats.value.orders > 0 ? stats.value.revenue / stats.value.orders : 50;
         const estSavingsFromPromos = promos.reduce((sum: number, p: any) => {
+          // Use real totalSavings if available (new logic), else fallback to old estimate
+          if (p.totalSavings !== undefined) return sum + p.totalSavings;
+          
           const uses = p.usageCount || 0;
           if (p.type === 'percent') {
             return sum + (p.value / 100) * avgOrderValue * uses;
