@@ -1004,16 +1004,16 @@ export default defineComponent({
       }
 
       try {
-        const headers = ['Order ID', 'Customer', 'Email', 'Date', 'Total', 'Status', 'Payment Status', 'Payment Method'];
+        const headers = ['Order ID', 'Customer', 'Email', 'Date', 'Total', 'Order Status', 'Payment Status', 'Payment Method'];
         const rows = filtered.map(o => [
-          o.id,
+          `"#${o.id.slice(-6).toUpperCase()}"`,
           `"${o.customer.replace(/"/g, '""')}"`,
           `"${o.email.replace(/"/g, '""')}"`,
-          this.formatDate(o.date),
+          `"${this.formatDate(o.date)}"`,
           o.total.toFixed(2),
-          o.status,
+          `"${o.status}"`,
           o.isPaid ? 'Paid' : 'Unpaid',
-          o.paymentMethod
+          `"${o.paymentMethod}"`
         ]);
 
         let csvContent = headers.join(',') + '\r\n';
@@ -1110,7 +1110,7 @@ export default defineComponent({
         doc.setFontSize(11);
         doc.setFont('helvetica', 'bold');
         doc.setTextColor(0, 0, 0);
-        doc.text('Total Revenue:', 15, y);
+        doc.text('Expected Revenue:', 15, y);
         doc.text('Collected (Paid):', 80, y);
         doc.text('Pending:', 145, y);
         y += 7;
@@ -1179,32 +1179,6 @@ export default defineComponent({
 
         y += 12;
 
-        // Monthly Revenue
-        doc.setFontSize(14);
-        doc.setFont('helvetica', 'bold');
-        doc.setTextColor(100, 116, 139);
-        doc.text('MONTHLY REVENUE', 15, y);
-        y += 10;
-
-        doc.setFontSize(10);
-        doc.text('Month', 15, y);
-        doc.text('Orders', 80, y);
-        doc.text('Revenue', 130, y);
-        y += 3;
-        doc.line(15, y, 190, y);
-        y += 7;
-
-        doc.setTextColor(0, 0, 0);
-        doc.setFont('helvetica', 'normal');
-
-        Object.entries(byMonth).slice(0, 6).forEach(([month, data]) => {
-          doc.text(month, 15, y);
-          doc.text(String(data.count), 80, y);
-          doc.text(this.formatMoney(data.revenue), 130, y);
-          y += 7;
-        });
-
-        y += 12;
 
         // Top Customers
         if (topCustomers.length > 0) {

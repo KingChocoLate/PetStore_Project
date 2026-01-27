@@ -355,7 +355,7 @@ export default defineComponent({
         // If API doesn't support block, update locally (UI-only for demo)
         if (error.response?.status === 404) {
           user.isBlocked = newStatus;
-          showToast(`${newStatus ? 'Blocked' : 'Unblocked'} (local only - API not available)`);
+          showToast(`${newStatus ? 'Blocked' : 'Unblocked'} (API not available)`);
         } else {
           console.error(error);
           showToast('Failed to update user status');
