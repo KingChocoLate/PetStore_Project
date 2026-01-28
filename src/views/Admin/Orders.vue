@@ -195,13 +195,14 @@
                   <td class="py-4 px-4 text-sm font-black text-slate-900">{{ formatMoney(o.total) }}</td>
 
                   <td class="py-4 px-4" @click.stop>
-                    <!-- Show locked badge for cancelled orders -->
-                    <div v-if="o.status === 'Cancelled'" class="flex items-center gap-2">
-                       <StatusBadge status="Cancelled" show-dot>
-                         Cancelled
+                    <!-- Show locked badge for finalized orders -->
+                    <div v-if="o.status === 'Cancelled' || o.status === 'Delivered'" class="flex items-center gap-2">
+                       <StatusBadge :status="o.status" show-dot>
+                         {{ o.status }}
                        </StatusBadge>
+                       <svg class="w-3 h-3 text-slate-400" fill="currentColor" viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM9 6c0-1.66 1.34-3 3-3s3 1.34 3 3v2H9V6zm9 14H6V10h12v10zm-6-3c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2z"/></svg>
                     </div>
-                    <!-- Show dropdown for non-cancelled orders -->
+                    <!-- Show dropdown for active orders -->
                     <div v-else class="relative inline-block">
                       <select
                         :value="o.status"
@@ -348,25 +349,31 @@
                       <p v-if="selected.isPaid && selected.paidAt" class="text-xs mt-1 opacity-75">{{ formatDate(selected.paidAt) }}</p>
                     </div>
                     <button
-                      v-if="!selected.isPaid"
+                      v-if="!selected.isPaid && selected.paymentMethod === 'Later' && selected.status !== 'Cancelled'"
                       @click="triggerMarkPaid(selected)"
-                      class="px-4 py-3 bg-emerald-600 text-white rounded-xl text-xs font-bold hover:bg-emerald-700 transition"
+                      class="px-4 py-3 bg-emerald-600 text-white rounded-xl text-xs font-bold hover:bg-emerald-700 transition shadow-lg shadow-emerald-100"
                     >
                       Mark Paid
                     </button>
                   </div>
-                  <p class="text-xs text-slate-400">Method: {{ selected.paymentMethod }}</p>
+                  <p class="text-[11px] font-bold text-slate-400">Method: {{ selected.paymentMethod }}</p>
+
                 </div>
+
 
                 <!-- Order Status -->
                 <div class="space-y-3">
                   <label class="text-xs font-bold text-slate-500 uppercase">Order Status</label>
                   <div class="relative">
-                     <select
+                      <select
                         v-model="selected.status"
                         @change="updateStatus(selected, $event)"
-                        class="w-full px-4 py-3 rounded-xl text-sm font-bold border outline-none cursor-pointer appearance-none"
-                        :class="statusPill(selected.status)"
+                        class="w-full px-4 py-3 rounded-xl text-sm font-bold border outline-none appearance-none transition-all"
+                        :class="[
+                          statusPill(selected.status),
+                          (selected.status === 'Cancelled' || selected.status === 'Delivered') ? 'opacity-80 cursor-not-allowed bg-slate-50' : 'cursor-pointer'
+                        ]"
+                        :disabled="selected.status === 'Cancelled' || selected.status === 'Delivered'"
                       >
                          <option value="Pending">Pending</option>
                          <option value="Processing">Processing</option>
@@ -374,13 +381,15 @@
                          <option value="Delivered">Delivered</option>
                          <option value="Cancelled">Cancelled</option>
                       </select>
-                      <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-current opacity-50">
+                      <div v-if="!(selected.status === 'Cancelled' || selected.status === 'Delivered')" class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-current opacity-50">
                           <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+                      </div>
+                      <div v-else class="absolute inset-y-0 right-0 flex items-center px-4 text-slate-400">
+                          <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM9 6c0-1.66 1.34-3 3-3s3 1.34 3 3v2H9V6zm9 14H6V10h12v10zm-6-3c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2z"/></svg>
                       </div>
                   </div>
                 </div>
               </div>
-
             </div>
 
             <div class="p-6 bg-slate-50 border-t border-slate-100 flex flex-wrap justify-between gap-3">
@@ -393,7 +402,7 @@
                    Invoice
                  </button>
                  <button
-                   v-if="selected.status !== 'Cancelled' && selected.paymentMethod !== 'Cash' && selected.paymentMethod !== 'COD'"
+                   v-if="selected.status !== 'Cancelled' && selected.isPaid && selected.paymentMethod !== 'Cash' && selected.paymentMethod !== 'COD'"
                    @click="handleRefund(selected)"
                    class="px-5 py-2.5 bg-rose-50 border border-rose-200 text-rose-700 rounded-xl text-xs font-bold hover:bg-rose-100 transition flex items-center gap-2"
                  >
@@ -407,7 +416,7 @@
                    title="Cash/COD payments cannot be auto-refunded"
                  >
                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
-                   Cash (No Refund)
+                   Cash
                  </span>
                </div>
                <button @click="closeDetails" class="px-6 py-2.5 bg-slate-900 text-white rounded-xl font-bold shadow-lg hover:bg-slate-800 transition">
@@ -418,20 +427,6 @@
         </div>
       </transition>
 
-      <!-- Cancel Confirmation Modal -->
-      <ConfirmModal
-        :is-open="showCancelConfirm"
-        title="Cancel This Order?"
-        confirm-text="Yes, Cancel"
-        cancel-text="Keep Order"
-        type="danger"
-        @close="cancelCancelConfirm"
-        @confirm="confirmCancelOrder"
-      >
-        <template #message>
-          <p class="text-slate-500 mb-6">This action <span class="font-bold text-rose-600">cannot be undone</span>. The order will be permanently cancelled.</p>
-        </template>
-      </ConfirmModal>
 
       <!-- Mark Paid Confirmation Modal -->
       <ConfirmModal
@@ -448,6 +443,49 @@
         </template>
         <template #message>
           <p class="text-slate-500 mb-6">Are you sure you want to mark this order as <strong>PAID</strong>? This will update the status and payment date.</p>
+        </template>
+      </ConfirmModal>
+
+      <!-- Update Status Confirmation Modal -->
+      <ConfirmModal
+        :is-open="showStatusUpdateConfirm"
+        :title="`Update Order Status?`"
+        :confirm-text="`Update to ${pendingStatusUpdate?.newStatus}`"
+        cancel-text="No, Cancel"
+        :type="pendingStatusUpdate?.newStatus === 'Cancelled' ? 'danger' : 'primary'"
+        @close="cancelStatusUpdateConfirm"
+        @confirm="confirmStatusUpdate"
+      >
+        <template #icon>
+          <div :class="['w-12 h-12 rounded-full flex items-center justify-center', 
+             pendingStatusUpdate?.newStatus === 'Cancelled' ? 'bg-rose-100 text-rose-600' : 
+             pendingStatusUpdate?.newStatus === 'Delivered' ? 'bg-emerald-100 text-emerald-600' : 'bg-blue-100 text-blue-600']">
+            <svg v-if="pendingStatusUpdate?.newStatus === 'Delivered'" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+            <svg v-else-if="pendingStatusUpdate?.newStatus === 'Cancelled'" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            <svg v-else class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+          </div>
+        </template>
+        <template #message>
+          <div class="text-slate-500 mb-6 space-y-3">
+            <p>Are you sure you want to change order <span class="font-mono font-bold">#{{ pendingStatusUpdate?.order.id.slice(-6).toUpperCase() }}</span> status to <span class="font-bold text-slate-900">{{ pendingStatusUpdate?.newStatus }}</span>?</p>
+            
+            <div v-if="pendingStatusUpdate?.newStatus === 'Delivered'" class="p-3 bg-emerald-50 rounded-xl border border-emerald-100 text-xs text-emerald-700">
+              <p class="font-bold mb-1 flex items-center gap-1.5 uppercase tracking-wider text-[10px]">
+                <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+                Irreversible Action
+              </p>
+              <p class="font-medium mb-1">This will permanently mark the order as <span class="font-black underline">Delivered</span>.</p>
+              <p class="text-[10px] opacity-80">This cannot be undone and will finalize the order in your analytics. <span v-if="pendingStatusUpdate?.order.paymentMethod === 'COD'">It also marks the payment as <span class="font-bold">PAID</span>.</span></p>
+            </div>
+
+            <div v-if="pendingStatusUpdate?.newStatus === 'Cancelled'" class="p-3 bg-rose-50 rounded-xl border border-rose-100 text-xs text-rose-700">
+              <p class="font-bold mb-1 uppercase tracking-wider text-[10px]">Critical Action</p>
+              <p class="font-medium mb-1">Changing status to <span class="font-black underline">Cancelled</span> is irreversible.</p>
+              <p class="text-[10px] opacity-80">All items will be cancelled and this action <span class="font-bold">cannot be undone</span>.</p>
+            </div>
+
+            <p class="text-[11px] italic">This update will trigger an automatic email notification to the customer.</p>
+          </div>
         </template>
       </ConfirmModal>
 
@@ -494,6 +532,7 @@ interface OrderRow {
     country: string;
     phone?: string;
   };
+  isDelivered?: boolean;
 }
 
 export default defineComponent({
@@ -511,15 +550,14 @@ export default defineComponent({
       pageSize: 8,
       showDetails: false,
       selected: null as OrderRow | null,
-      showCancelConfirm: false,
-      pendingCancelOrder: null as OrderRow | null,
-      pendingCancelEvent: null as any,
       showMarkPaidConfirm: false,
       pendingPaidOrder: null as OrderRow | null,
       activePaymentFilter: 'all' as 'all' | 'paid' | 'unpaid',
       showExportMenu: false,
       showReportMenu: false,
       exportOptions: ['All Time', 'Today', 'This Week', 'This Month', 'This Year'],
+      showStatusUpdateConfirm: false,
+      pendingStatusUpdate: null as { order: OrderRow, newStatus: Status, event?: any } | null,
     };
   },
   watch: {
@@ -701,7 +739,7 @@ export default defineComponent({
     },
 
     async updateStatus(order: OrderRow, event: any) {
-       const newStatus = event.target ? event.target.value : event;
+       const newStatus = (event.target ? event.target.value : event) as Status;
 
        // If order is already cancelled, prevent any changes
        if (order.status === 'Cancelled') {
@@ -724,58 +762,60 @@ export default defineComponent({
          return;
        }
 
-       // If changing to Cancelled, show confirmation modal
-       if (newStatus === 'Cancelled') {
-         this.pendingCancelOrder = order;
-         this.pendingCancelEvent = event;
-         this.showCancelConfirm = true;
-         // Reset the select to old value (will update if confirmed)
-         if (event.target) event.target.value = order.status;
-         return;
-       }
-
-       const oldStatus = order.status;
-       order.status = newStatus;
-
-       try {
-          await axios.put(`${API_BASE}/orders/${order.id}/status`, { status: newStatus }, this.getAuthHeader());
-          this.showToast(`Order updated to ${newStatus}`);
-       } catch (error) {
-          console.error(error);
-          order.status = oldStatus;
-          this.showToast("Failed to update status.");
-       }
+       // 🛑 Trigger Confirmation Modal instead of immediate update
+       this.pendingStatusUpdate = { order, newStatus, event };
+       this.showStatusUpdateConfirm = true;
+       
+       // Reset UI select temporarily (will update if confirmed)
+       if (event.target) event.target.value = order.status;
     },
 
-    cancelCancelConfirm() {
-      this.showCancelConfirm = false;
-      this.pendingCancelOrder = null;
-      this.pendingCancelEvent = null;
+    cancelStatusUpdateConfirm() {
+      this.showStatusUpdateConfirm = false;
+      this.pendingStatusUpdate = null;
     },
 
-    async confirmCancelOrder() {
-      if (!this.pendingCancelOrder) return;
+    async confirmStatusUpdate() {
+      if (!this.pendingStatusUpdate) return;
 
-      const order = this.pendingCancelOrder;
+      const { order, newStatus } = this.pendingStatusUpdate;
       const oldStatus = order.status;
-      order.status = 'Cancelled' as Status;
+      
+      // Optimitic UI Update
+      order.status = newStatus;
+      if (this.selected && this.selected.id === order.id) {
+        this.selected.status = newStatus;
+      }
 
       try {
-        await axios.put(`${API_BASE}/orders/${order.id}/status`, { status: 'Cancelled' }, this.getAuthHeader());
-        this.showToast("Order has been cancelled.");
+        await axios.put(`${API_BASE}/orders/${order.id}/status`, { status: newStatus }, this.getAuthHeader());
+        this.showToast(`Order updated to ${newStatus}`);
+        
         // Update in main orders array
         const idx = this.orders.findIndex(o => o.id === order.id);
         if (idx !== -1 && this.orders[idx]) {
-          this.orders[idx].status = 'Cancelled' as Status;
+          this.orders[idx].status = newStatus;
+          // Handle Delivered specifics (matching backend logic for UI sync)
+          if (newStatus === 'Delivered') {
+            this.orders[idx].isDelivered = true;
+            if (this.orders[idx].paymentMethod === 'COD') {
+              this.orders[idx].isPaid = true;
+            }
+          }
         }
       } catch (error) {
         console.error(error);
         order.status = oldStatus;
-        this.showToast("Failed to cancel order.");
+        if (this.selected && this.selected.id === order.id) {
+          this.selected.status = oldStatus;
+        }
+        this.showToast("Failed to update status.");
       } finally {
-        this.cancelCancelConfirm();
+        this.cancelStatusUpdateConfirm();
       }
     },
+
+
 
     cancelMarkPaidConfirm() {
       this.showMarkPaidConfirm = false;
